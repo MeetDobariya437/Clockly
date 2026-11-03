@@ -1,1518 +1,1843 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clocky for Windows — Smart HRMS Attendance & Wellness Widget</title>
-  <meta name="description" content="Native Windows desktop widget for HRMS attendance tracking, 1-click punch in/out, office geofence verification, shift reminders, and hydration alerts.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="apple-touch-icon" href="app-icon.png">
-  <style>
-    :root {
-      --bg: #f8fafc;
-      --surface: #ffffff;
-      --surface-subtle: #f1f5f9;
-      --border: #e2e8f0;
-      --border-focus: #cbd5e1;
-      --text: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #64748b;
-      --primary: #0f172a;
-      --primary-hover: #1e293b;
-      --blue: #2563eb;
-      --blue-subtle: #eff6ff;
-      --blue-border: #bfdbfe;
-      --success: #15803d;
-      --success-bg: #f0fdf4;
-      --success-border: #bbf7d0;
-      --warning: #b45309;
-      --warning-bg: #fef3c7;
-      --warning-border: #fde68a;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-      --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-      --ink: #2B2140;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clocky for Windows — Smart HRMS Attendance & Wellness Widget</title>
+    <meta
+      name="description"
+      content="Native Windows desktop widget for HRMS attendance tracking, 1-click punch in/out, office geofence verification, shift reminders, and hydration alerts."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="apple-touch-icon" href="app-icon.png" />
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --surface-subtle: #f1f5f9;
+        --border: #e2e8f0;
+        --border-focus: #cbd5e1;
+        --text: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --primary: #0f172a;
+        --primary-hover: #1e293b;
+        --blue: #2563eb;
+        --blue-subtle: #eff6ff;
+        --blue-border: #bfdbfe;
+        --success: #15803d;
+        --success-bg: #f0fdf4;
+        --success-border: #bbf7d0;
+        --warning: #b45309;
+        --warning-bg: #fef3c7;
+        --warning-border: #fde68a;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md:
+          0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        --shadow-lg:
+          0 12px 28px -4px rgba(0, 0, 0, 0.08),
+          0 4px 12px -2px rgba(0, 0, 0, 0.04);
+        --ink: #2b2140;
+      }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 48px 20px;
-      -webkit-font-smoothing: antialiased;
-      line-height: 1.5;
-    }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 48px 20px;
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.5;
+      }
 
-    .container {
-      max-width: 860px;
-      width: 100%;
-      margin: 0 auto;
-    }
+      .container {
+        max-width: 860px;
+        width: 100%;
+        margin: 0 auto;
+      }
 
-    /* Header */
-    header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
+      /* Header */
+      header {
+        text-align: center;
+        margin-bottom: 48px;
+      }
 
-    .app-icon-wrapper {
-      margin-bottom: 22px;
-      display: inline-block;
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
+      .app-icon-wrapper {
+        margin-bottom: 22px;
+        display: inline-block;
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
 
-    .app-icon-wrapper:hover {
-      transform: translateY(-4px) scale(1.04);
-    }
+      .app-icon-wrapper:hover {
+        transform: translateY(-4px) scale(1.04);
+      }
 
-    .app-icon-img {
-      display: block;
-      border-radius: 22px;
-      box-shadow: 0 14px 28px -4px rgba(15, 23, 42, 0.16), 0 4px 10px -2px rgba(15, 23, 42, 0.08);
-    }
+      .app-icon-img {
+        display: block;
+        border-radius: 22px;
+        box-shadow:
+          0 14px 28px -4px rgba(15, 23, 42, 0.16),
+          0 4px 10px -2px rgba(15, 23, 42, 0.08);
+      }
 
-    .version-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 14px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 18px;
-      box-shadow: var(--shadow-sm);
-    }
+      .version-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 14px;
+        border-radius: 999px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 18px;
+        box-shadow: var(--shadow-sm);
+      }
 
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #10b981;
-      animation: pulse-dot 2s infinite;
-    }
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #10b981;
+        animation: pulse-dot 2s infinite;
+      }
 
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(1.15); }
-    }
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.6;
+          transform: scale(1.15);
+        }
+      }
 
-    h1 {
-      font-size: 42px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: var(--text);
-      line-height: 1.15;
-      margin-bottom: 14px;
-    }
+      h1 {
+        font-size: 42px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text);
+        line-height: 1.15;
+        margin-bottom: 14px;
+      }
 
-    .tagline {
-      font-size: 17px;
-      color: var(--text-secondary);
-      max-width: 620px;
-      margin: 0 auto 30px;
-      line-height: 1.6;
-    }
+      .tagline {
+        font-size: 17px;
+        color: var(--text-secondary);
+        max-width: 620px;
+        margin: 0 auto 30px;
+        line-height: 1.6;
+      }
 
-    /* Actions */
-    .cta-group {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+      /* Actions */
+      .cta-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.15s ease;
-      cursor: pointer;
-    }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        cursor: pointer;
+      }
 
-    .btn-primary {
-      background: var(--primary);
-      color: #ffffff;
-      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
-    }
+      .btn-primary {
+        background: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+      }
 
-    .btn-primary:hover {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.22);
-    }
+      .btn-primary:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.22);
+      }
 
-    .btn-secondary {
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-    }
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+      }
 
-    .btn-secondary:hover {
-      background: var(--surface-subtle);
-      border-color: var(--border-focus);
-      transform: translateY(-1px);
-    }
+      .btn-secondary:hover {
+        background: var(--surface-subtle);
+        border-color: var(--border-focus);
+        transform: translateY(-1px);
+      }
 
-    .meta-note {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 14px;
-    }
+      .meta-note {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 14px;
+      }
 
-    /* Section Headings */
-    .section-header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
+      /* Section Headings */
+      .section-header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
 
-    .section-eyebrow {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 700;
-      color: var(--blue);
-      margin-bottom: 6px;
-    }
+      .section-eyebrow {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        color: var(--blue);
+        margin-bottom: 6px;
+      }
 
-    .section-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.02em;
-    }
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
 
-    .section-subtitle {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
+      .section-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
 
-    /* Showcase Preview */
-    .preview-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 48px;
-      box-shadow: var(--shadow-md);
-    }
+      /* Showcase Preview */
+      .preview-section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 48px;
+        box-shadow: var(--shadow-md);
+      }
 
-    .mockup-header {
-      background: #1e293b;
-      color: #94a3b8;
-      padding: 10px 16px;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
+      .mockup-header {
+        background: #1e293b;
+        color: #94a3b8;
+        padding: 10px 16px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #cbd5e1;
-    }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #cbd5e1;
+      }
 
-    .win-logo {
-      font-size: 14px;
-      color: #38bdf8;
-    }
+      .win-logo {
+        font-size: 14px;
+        color: #38bdf8;
+      }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
 
-    .active-ticker-pill {
-      background: rgba(37, 99, 235, 0.25);
-      border: 1px solid rgba(96, 165, 250, 0.4);
-      color: #ffffff;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+      .active-ticker-pill {
+        background: rgba(37, 99, 235, 0.25);
+        border: 1px solid rgba(96, 165, 250, 0.4);
+        color: #ffffff;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
 
-    .active-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #4ade80;
-    }
+      .active-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #4ade80;
+      }
 
-    .mockup-body {
-      padding: 28px 24px;
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 24px;
-      background: #fafafa;
-      align-items: center;
-    }
-
-    @media (max-width: 720px) {
       .mockup-body {
-        grid-template-columns: 1fr;
-        justify-items: center;
+        padding: 28px 24px;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 24px;
+        background: #fafafa;
+        align-items: center;
       }
-    }
 
-    /* Embedded Interactive Widget Card */
-    .widget-preview-card {
-      width: 248px;
-      height: 318px;
-      background-color: #E8FBF1;
-      border: 3px solid var(--ink);
-      border-radius: 28px;
-      box-shadow: 5px 5px 0 var(--ink);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px 12px 12px;
-      position: relative;
-      font-family: 'Baloo 2', sans-serif;
-      transition: background-color 0.4s ease;
-      user-select: none;
-    }
-
-    .widget-preview-card.sleep {
-      background-color: #FFF9E6;
-    }
-
-    .wp-header {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 4px;
-      height: 24px;
-    }
-
-    .wp-date {
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--ink);
-    }
-
-    .wp-close {
-      background: transparent;
-      border: none;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--ink);
-      cursor: pointer;
-    }
-
-    .wp-bubble {
-      background: #FFFFFF;
-      border: 3px solid var(--ink);
-      border-radius: 14px;
-      padding: 5px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      text-align: center;
-      max-width: 210px;
-      min-height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1.25;
-      color: var(--ink);
-      box-shadow: 2px 2px 0 var(--ink);
-      position: relative;
-    }
-
-    .wp-bubble::after {
-      content: '';
-      position: absolute;
-      bottom: -7px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 6px solid var(--ink);
-    }
-
-    .wp-mascot-area {
-      height: 98px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .wp-svg {
-      width: 110px;
-      height: 95px;
-      overflow: visible;
-      animation: clocky-hop 2.4s ease-in-out infinite;
-      transform-origin: 60px 100px;
-    }
-
-    @keyframes clocky-hop {
-      0%, 75%, 100% { transform: translateY(0) scale(1, 1); }
-      85% { transform: translateY(-7px) scale(0.97, 1.05); }
-      92% { transform: translateY(0) scale(1.05, 0.95); }
-    }
-
-    .wp-time-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin-top: -4px;
-    }
-
-    .wp-time-val {
-      font-size: 26px;
-      font-weight: 800;
-      line-height: 1;
-      color: var(--ink);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .wp-time-lbl {
-      font-size: 11px;
-      font-weight: 600;
-      color: rgba(43, 33, 64, 0.75);
-      margin-top: 2px;
-    }
-
-    .wp-btn {
-      width: 100%;
-      height: 42px;
-      border: 3px solid var(--ink);
-      border-radius: 16px;
-      box-shadow: 0 4px 0 var(--ink);
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--ink);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #FF8A7A;
-      transition: transform 0.08s ease;
-    }
-
-    .wp-btn:active {
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 var(--ink);
-    }
-
-    /* Right column info */
-    .mockup-info-col {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .mockup-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .mockup-card-title {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-
-    .timer-display {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.02em;
-      margin-bottom: 8px;
-    }
-
-    .status-badge-inline {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      background: var(--success-bg);
-      border: 1px solid var(--success-border);
-      color: var(--success);
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .diagnostic-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-    }
-
-    .diagnostic-row:last-child {
-      border-bottom: none;
-    }
-
-    .diagnostic-label {
-      color: var(--text-secondary);
-    }
-
-    .diagnostic-val {
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    /* Interactive Mood Switcher */
-    .mood-switcher-row {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 6px;
-    }
-
-    .mood-btn {
-      background: var(--surface-subtle);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 6px 11px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .mood-btn:hover, .mood-btn.active {
-      background: var(--primary);
-      color: #ffffff;
-      border-color: var(--primary);
-    }
-
-    /* REMINDERS & WELLNESS SECTION (The WOW section) */
-    .reminders-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      margin-bottom: 48px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .reminders-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 24px;
-    }
-
-    .reminder-box {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      background: var(--surface-subtle);
-      position: relative;
-      overflow: hidden;
-      transition: all 0.2s ease;
-    }
-
-    .reminder-box:hover {
-      border-color: var(--blue-border);
-      background: #ffffff;
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
-    }
-
-    .reminder-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 9px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 12px;
-    }
-
-    .badge-morning {
-      background: #fef3c7;
-      color: #b45309;
-      border: 1px solid #fde68a;
-    }
-
-    .badge-evening {
-      background: #fee2e2;
-      color: #b91c1c;
-      border: 1px solid #fecaca;
-    }
-
-    .badge-wellness {
-      background: #e0f2fe;
-      color: #0369a1;
-      border: 1px solid #bae6fd;
-    }
-
-    .reminder-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .reminder-desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .reminder-rule {
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--text-muted);
-      background: rgba(15, 23, 42, 0.05);
-      padding: 6px 10px;
-      border-radius: 6px;
-      line-height: 1.4;
-    }
-
-    /* Live Notification Tester Bar */
-    .tester-card {
-      margin-top: 24px;
-      background: #0f172a;
-      border-radius: 12px;
-      padding: 20px 24px;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .tester-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .tester-title {
-      font-size: 14px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .tester-btns {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .test-pill-btn {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #f8fafc;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .test-pill-btn:hover {
-      background: #38bdf8;
-      color: #0f172a;
-      border-color: #38bdf8;
-      transform: translateY(-1px);
-    }
-
-    /* Interactive Windows 11 Notification Toast */
-    .toast-container {
-      position: fixed;
-      top: 24px;
-      right: 24px;
-      z-index: 9999;
-      pointer-events: none;
-    }
-
-    .win-toast {
-      width: 340px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      border-radius: 12px;
-      box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.18), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
-      padding: 14px 16px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      pointer-events: auto;
-      transform: translateX(400px);
-      opacity: 0;
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
-    }
-
-    .win-toast.show {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    .toast-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      background: #0f172a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      flex-shrink: 0;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .toast-content {
-      flex: 1;
-    }
-
-    .toast-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2px;
-    }
-
-    .toast-app-name {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .toast-time {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .toast-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 2px;
-    }
-
-    .toast-body {
-      font-size: 12px;
-      color: var(--text-secondary);
-      line-height: 1.35;
-    }
-
-    .toast-close {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 14px;
-      cursor: pointer;
-      padding: 0 4px;
-      line-height: 1;
-    }
-
-    /* A Day in the Office Timeline */
-    .timeline-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      margin-bottom: 48px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .timeline {
-      position: relative;
-      margin-top: 24px;
-      padding-left: 28px;
-    }
-
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      bottom: 10px;
-      width: 2px;
-      background: var(--border);
-    }
-
-    .timeline-node {
-      position: relative;
-      margin-bottom: 20px;
-    }
-
-    .timeline-node:last-child {
-      margin-bottom: 0;
-    }
-
-    .timeline-dot {
-      position: absolute;
-      left: -28px;
-      top: 4px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--surface);
-      border: 3px solid var(--blue);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .timeline-time {
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      color: var(--blue);
-      margin-bottom: 2px;
-    }
-
-    .timeline-heading {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 2px;
-    }
-
-    .timeline-text {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.45;
-    }
-
-    /* Comparison Table */
-    .comparison-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      margin-bottom: 48px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .comp-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 13px;
-    }
-
-    .comp-table th, .comp-table td {
-      padding: 12px 14px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .comp-table th {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-      background: var(--surface-subtle);
-    }
-
-    .comp-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .feature-name {
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .bad-cell {
-      color: #991b1b;
-      font-weight: 500;
-    }
-
-    .good-cell {
-      color: #15803d;
-      font-weight: 700;
-    }
-
-    /* Features Grid */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-      margin-bottom: 48px;
-    }
-
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.15s ease;
-    }
-
-    .feature-card:hover {
-      border-color: var(--border-focus);
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
-    }
-
-    .icon-box {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      background: var(--surface-subtle);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary);
-      margin-bottom: 14px;
-    }
-
-    .feature-title {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-
-    .feature-desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* Setup Guide Card */
-    .setup-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 28px;
-      margin-bottom: 48px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .setup-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text);
-    }
-
-    .steps-list {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .step-item {
-      display: flex;
-      gap: 14px;
-    }
-
-    .step-num {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: var(--surface-subtle);
-      border: 1px solid var(--border);
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .step-content {
-      flex: 1;
-    }
-
-    .step-heading {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: var(--text);
-    }
-
-    .step-text {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: auto;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
-      width: 100%;
-    }
-  </style>
-</head>
-<body>
-  <div class="toast-container">
-    <div class="win-toast" id="win-toast">
-      <div class="toast-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      </div>
-      <div class="toast-content">
-        <div class="toast-header-row">
-          <span class="toast-app-name">Clocky Reminder</span>
-          <span class="toast-time">just now</span>
-        </div>
-        <div class="toast-title" id="toast-title">Clock-In Reminder</div>
-        <div class="toast-body" id="toast-body">It is past 10:00 AM! Don't forget to clock in for your shift.</div>
-      </div>
-      <button class="toast-close" onclick="hideToast()">✕</button>
-    </div>
-  </div>
-
-  <div class="container">
-    <header>
-      <div class="app-icon-wrapper">
-        <img src="app-icon.png" alt="Clocky App Icon" class="app-icon-img" width="88" height="88">
-      </div>
-      <div>
-        <div class="version-badge">
-          <span class="status-dot"></span>
-          <span id="version-text">v1.0.0 • Native Windows 10 & 11 App</span>
-        </div>
-      </div>
-      <h1>Clocky for Windows</h1>
-      <p class="tagline">
-        Say goodbye to forgotten punches and messy browser tabs. Clocky is the delightful desktop attendance companion that sits quietly on your screen, protects your check-in streaks, and cares for your health with timely nudges.
-      </p>
-      <div class="cta-group">
-        <a href="https://github.com/MeetDobariya437/Clockly/releases/download/v1.0.0/Clocky_1.0.0_x64-setup.exe" class="btn btn-primary" id="download-exe">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download for Windows (.exe)
-        </a>
-        <a href="https://github.com/MeetDobariya437/Clockly/releases" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-          View on GitHub
-        </a>
-      </div>
-      <p class="meta-note">Windows 10 & 11 (64-bit) • Under 10 MB • Instant Launch • Zero Bloat</p>
-    </header>
-
-    <!-- Interactive Product UI Showcase -->
-    <div class="preview-section">
-      <div class="mockup-header">
-        <div class="header-left">
-          <span class="win-logo">⊞</span>
-          <span style="font-weight: 600; color: #f8fafc;">Clocky Desktop Companion</span>
-          <span>Pinned to Wallpaper</span>
-          <span>System Tray Active</span>
-        </div>
-        <div class="header-right">
-          <div class="active-ticker-pill">
-            <span class="active-dot"></span>
-            <span id="header-timer">04:14:21</span>
-          </div>
-          <span>Fri 10:42 AM</span>
-        </div>
-      </div>
-      <div class="mockup-body">
-        
-        <!-- Live Clocky Widget Simulator -->
-        <div class="widget-preview-card" id="widget-card">
-          <div class="wp-header">
-            <span class="wp-date">Tue, Nov 3</span>
-            <button class="wp-close" title="Hide widget">x</button>
-          </div>
-          <div class="wp-bubble" id="widget-bubble">
-            Clocked in and rolling! Looking good today.
-          </div>
-          <div class="wp-mascot-area" id="widget-mascot">
-            <!-- Dynamic SVG injected by JS -->
-          </div>
-          <div class="wp-time-area">
-            <div class="wp-time-val" id="widget-timer">04:14:21</div>
-            <div class="wp-time-lbl" id="widget-status-lbl">worked today</div>
-          </div>
-          <button class="wp-btn" id="widget-action-btn">Clock Out</button>
-        </div>
-
-        <!-- Live Diagnostics & Mood Controls -->
-        <div class="mockup-info-col">
-          <div class="mockup-card">
-            <div class="mockup-card-title">Live Work Session</div>
-            <div class="timer-display" id="demo-timer">04:14:21</div>
-            <div class="status-badge-inline">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Clocked In • In Office
-            </div>
-          </div>
-          <div class="mockup-card">
-            <div class="mockup-card-title">Attendance Diagnostic</div>
-            <div class="diagnostic-row">
-              <span class="diagnostic-label">Office Geofence</span>
-              <span class="diagnostic-val" style="color: #15803d;">Verified (Office Coordinates)</span>
-            </div>
-            <div class="diagnostic-row">
-              <span class="diagnostic-label">Location Provider</span>
-              <span class="diagnostic-val">Windows Geolocator Active</span>
-            </div>
-            <div class="diagnostic-row">
-              <span class="diagnostic-label">Credentials Storage</span>
-              <span class="diagnostic-val">Windows Credential Locker (Secure)</span>
-            </div>
-            <div class="diagnostic-row">
-              <span class="diagnostic-label">Health Reminders</span>
-              <span class="diagnostic-val">Water & Stretch Alerts Active</span>
-            </div>
-          </div>
-          <div class="mockup-card">
-            <div class="mockup-card-title">Test Clocky's Shifting Moods</div>
-            <div class="mood-switcher-row">
-              <button class="mood-btn" onclick="setMood('morning')">☀️ Morning</button>
-              <button class="mood-btn active" onclick="setMood('midday')">💻 Midday</button>
-              <button class="mood-btn" onclick="setMood('afternoon')">🥱 Afternoon</button>
-              <button class="mood-btn" onclick="setMood('overtime')">🔥 Overtime</button>
-              <button class="mood-btn" onclick="setMood('done')">🌙 Shift Done</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- THE WOW SECTION: Smart Reminders & Wellness Engine -->
-    <div class="reminders-section">
-      <div class="section-header">
-        <div class="section-eyebrow">Zero Forgotten Punches • 100% Care</div>
-        <div class="section-title">The Intelligent Reminder & Wellness Engine</div>
-        <div class="section-subtitle">Never miss a check-in or check-out again. Clocky keeps watch so HR never has to flag you.</div>
-      </div>
-
-      <div class="reminders-grid">
-        <!-- Morning Check-in -->
-        <div class="reminder-box">
-          <span class="reminder-badge badge-morning">⏰ Morning Guard</span>
-          <div class="reminder-title">10:00 AM Check-In Reminder</div>
-          <div class="reminder-desc">
-            If 10:00 AM arrives and you haven't punched in yet, Clocky sends a gentle reminder every 10 minutes until you check in.
-          </div>
-          <div class="reminder-rule">
-            Rule: After 10:00 AM • Every 10 min • Stops immediately when clocked in
-          </div>
-        </div>
-
-        <!-- Evening Check-out -->
-        <div class="reminder-box">
-          <span class="reminder-badge badge-evening">🌙 Evening Sentinel</span>
-          <div class="reminder-title">7:00 PM Clock-Out Alert</div>
-          <div class="reminder-desc">
-            Finished your shift? Starting at 7:00 PM, Clocky alerts you every 10 minutes so you never leave the office without clocking out.
-          </div>
-          <div class="reminder-rule">
-            Rule: From 7:00 PM • Every 10 min • Stops immediately upon clock out
-          </div>
-        </div>
-
-        <!-- Hydration Checks -->
-        <div class="reminder-box">
-          <span class="reminder-badge badge-wellness">💧 Hydration Nudge</span>
-          <div class="reminder-title">Drink Water Reminders</div>
-          <div class="reminder-desc">
-            Long meetings and coding marathons can dry you out. Clocky prompts you to grab a fresh glass of water every 60 minutes.
-          </div>
-          <div class="reminder-rule">
-            Cadence: Every 60 min while working • Auto-pauses after shift
-          </div>
-        </div>
-
-        <!-- Desk Mobility & Stretch -->
-        <div class="reminder-box">
-          <span class="reminder-badge badge-wellness">🙆 Mobility & Stretch</span>
-          <div class="reminder-title">Arm & Shoulder Stretches</div>
-          <div class="reminder-desc">
-            Loosen tight wrists, roll your shoulders back, and unbend your spine with quick micro-break stretch prompts.
-          </div>
-          <div class="reminder-rule">
-            Prompts: Overhead stretch • Shoulder rolls • Posture reset
-          </div>
-        </div>
-
-        <!-- Eye Care 20-20-20 -->
-        <div class="reminder-box">
-          <span class="reminder-badge badge-wellness">👀 Eye Health Care</span>
-          <div class="reminder-title">20-20-20 Visual Breaks</div>
-          <div class="reminder-desc">
-            Look at something 20 feet away for 20 seconds to prevent screen fatigue and keep your vision sharp all day.
-          </div>
-          <div class="reminder-rule">
-            Benefit: Prevents headaches, eye strain, and dry eyes
-          </div>
-        </div>
-
-        <!-- Clean Day-End Protection -->
-        <div class="reminder-box">
-          <span class="reminder-badge badge-morning">🛡️ Zero Disturbance</span>
-          <div class="reminder-title">Auto-Stop & No Spam</div>
-          <div class="reminder-desc">
-            The instant you clock in or out, all alerts stop. When your shift ends, buttons are removed and Clocky peacefully sleeps.
-          </div>
-          <div class="reminder-rule">
-            Behavior: Native Windows toast only • Zero window focus theft
-          </div>
-        </div>
-      </div>
-
-      <!-- Live Notification Tester Interactive Bar -->
-      <div class="tester-card">
-        <div class="tester-top">
-          <div class="tester-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            Interactive Toast Tester (Click to Preview Windows Notifications)
-          </div>
-          <span style="font-size: 12px; color: #94a3b8;">Includes authentic sound chime!</span>
-        </div>
-        <div class="tester-btns">
-          <button class="test-pill-btn" onclick="testNotification('morning')">🔔 Test 10:00 AM Nag</button>
-          <button class="test-pill-btn" onclick="testNotification('evening')">🌙 Test 7:00 PM Nag</button>
-          <button class="test-pill-btn" onclick="testNotification('water')">💧 Test Water Break</button>
-          <button class="test-pill-btn" onclick="testNotification('stretch')">🙆 Test Arm Stretch</button>
-          <button class="test-pill-btn" onclick="testNotification('posture')">🧘 Test Posture Reset</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- A Day in the Office Timeline -->
-    <div class="timeline-card">
-      <div class="section-header" style="text-align: left; margin-bottom: 0;">
-        <div class="section-eyebrow">Workday Journey</div>
-        <div class="section-title">A Day in the Office with Clocky</div>
-      </div>
-      <div class="timeline">
-        <div class="timeline-node">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">09:50 AM — Arrival at Office</div>
-          <div class="timeline-heading">Clocky is Curled Up Asleep</div>
-          <div class="timeline-text">Sitting quietly on your wallpaper. Peaceful lavender mascot with floating zZz. Ready when you are.</div>
-        </div>
-        <div class="timeline-node">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">10:00 AM — Morning Clock-In Guard</div>
-          <div class="timeline-heading">Gentle Reminder Fires If Not Clocked In</div>
-          <div class="timeline-text">If you're making coffee or chatting, Clocky sends a desktop notification every 10 minutes so your on-time streak stays spotless.</div>
-        </div>
-        <div class="timeline-node">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">10:05 AM — 1-Click Punch In</div>
-          <div class="timeline-heading">Instant Geofence Verification & Mascot Wakes Up!</div>
-          <div class="timeline-text">Click "Clock In" — Windows Geolocator verifies you're at the office. Clocky bursts into happy butter yellow with sparkling big eyes!</div>
-        </div>
-        <div class="timeline-node">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">02:30 PM — Afternoon Recharge</div>
-          <div class="timeline-heading">Hydration Check & Focused Expression</div>
-          <div class="timeline-text">"Hydration check! Drink a glass of fresh water to keep your energy up." Clocky transitions into a steady, focused work expression.</div>
-        </div>
-        <div class="timeline-node">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">05:00 PM — Desk Mobility Check</div>
-          <div class="timeline-heading">Stretch Overhead & Eye Rest</div>
-          <div class="timeline-text">Clocky nudges you to roll your shoulders and rest your eyes before the evening sprint.</div>
-        </div>
-        <div class="timeline-node">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">07:00 PM — Shift Completed Guard</div>
-          <div class="timeline-heading">Clock-Out Alert Activates</div>
-          <div class="timeline-text">"It's past 7:00 PM! Don't forget to clock out for the day." Prevents forgotten evening punches.</div>
-        </div>
-        <div class="timeline-node">
-          <div class="timeline-dot"></div>
-          <div class="timeline-time">07:15 PM — Clock Out & Day End</div>
-          <div class="timeline-heading">Buttons Disappear & Clocky Sleeps Contentedly</div>
-          <div class="timeline-text">1-Click Clock Out! Action buttons are safely removed on day end. Clocky curls back into lavender sleep with happy curved eyes (^ ^). See you tomorrow!</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Comparison Section: Why Clocky Beats the Old Way -->
-    <div class="comparison-section">
-      <div class="section-header">
-        <div class="section-eyebrow">The Upgrade You Deserve</div>
-        <div class="section-title">Browser HRMS Portal vs. Clocky Desktop</div>
-      </div>
-      <table class="comp-table">
-        <thead>
-          <tr>
-            <th>Experience Feature</th>
-            <th>Old Web Portal</th>
-            <th>Clocky for Windows</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="feature-name">Punch In / Out Speed</td>
-            <td class="bad-cell">Open browser, 6 clicks, slow loads</td>
-            <td class="good-cell">1-Click instant desktop button</td>
-          </tr>
-          <tr>
-            <td class="feature-name">Forgotten Check-In Prevention</td>
-            <td class="bad-cell">None (HR flags you later)</td>
-            <td class="good-cell">10:00 AM smart nag every 10 min</td>
-          </tr>
-          <tr>
-            <td class="feature-name">Forgotten Check-Out Prevention</td>
-            <td class="bad-cell">None (shift remains open)</td>
-            <td class="good-cell">7:00 PM evening alert every 10 min</td>
-          </tr>
-          <tr>
-            <td class="feature-name">Health & Wellness Nudges</td>
-            <td class="bad-cell">None</td>
-            <td class="good-cell">Hydration, arm stretch & posture alerts</td>
-          </tr>
-          <tr>
-            <td class="feature-name">Mood Mascot</td>
-            <td class="bad-cell">Boring tabular portal</td>
-            <td class="good-cell">Adorable expressive companion</td>
-          </tr>
-          <tr>
-            <td class="feature-name">Memory & Resource Usage</td>
-            <td class="bad-cell">Heavy browser tab (~250 MB RAM)</td>
-            <td class="good-cell">Tiny native Rust/Tauri core (&lt;25 MB RAM)</td>
-          </tr>
-          <tr>
-            <td class="feature-name">Credentials Security</td>
-            <td class="bad-cell">Browser cache / plain storage</td>
-            <td class="good-cell">Windows Credential Locker (Encrypted)</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- 6 Features Grid -->
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="icon-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        </div>
-        <div class="feature-title">Always on Desktop & Tray</div>
-        <div class="feature-desc">Sits directly on your wallpaper. Win+D and 3-finger swipe proof. Never steals Alt+Tab focus or clutters taskbar.</div>
-      </div>
-      <div class="feature-card">
-        <div class="icon-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
-        </div>
-        <div class="feature-title">Office Geofence Verification</div>
-        <div class="feature-desc">Integrated Windows Geolocator verifies proximity to office coordinates automatically with fast 2.5s fallback.</div>
-      </div>
-      <div class="feature-card">
-        <div class="icon-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-        </div>
-        <div class="feature-title">Dynamic Mascot Expressions</div>
-        <div class="feature-desc">Clocky smoothly evolves moods throughout the day—from cheerful morning bounce to evening overtime fatigue.</div>
-      </div>
-      <div class="feature-card">
-        <div class="icon-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <div class="feature-title">10 AM & 7 PM Shift Reminders</div>
-        <div class="feature-desc">Nags after 10 AM every 10 min until you clock in, and from 7 PM until you clock out. Stops immediately when actioned.</div>
-      </div>
-      <div class="feature-card">
-        <div class="icon-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-        </div>
-        <div class="feature-title">Hydration & Stretch Alerts</div>
-        <div class="feature-desc">Stay healthy with periodic reminders to drink fresh water, stretch your arms overhead, reset posture, and rest your eyes.</div>
-      </div>
-      <div class="feature-card">
-        <div class="icon-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div class="feature-title">Windows Credential Locker</div>
-        <div class="feature-desc">Zero plaintext tokens. Your login session is encrypted securely inside the OS keychain with automatic token refresh.</div>
-      </div>
-    </div>
-
-    <!-- First-Time Quick Setup Guide -->
-    <div class="setup-card">
-      <div class="setup-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        First-Time Quick Setup (Windows)
-      </div>
-      <div class="steps-list">
-        <div class="step-item">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <div class="step-heading">Download & Run the Setup</div>
-            <div class="step-text">Download <code>Clocky_1.0.0_x64-setup.exe</code> and run the installer. Clocky is an ultra-lightweight app under 10 MB and installs in seconds.</div>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <div class="step-heading">Sign In Once with Your HRMS Email</div>
-            <div class="step-text">Enter your office email and password. Your credentials are securely locked in Windows Credential Manager so you never have to re-login.</div>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <div class="step-heading">Enjoy Effortless Attendance!</div>
-            <div class="step-text">Clocky autostarts with Windows, sits quietly in your tray/desktop, and takes care of your punches, reminders, and wellness breaks.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <footer>
-      Internal Office Distribution • HRMS Engineering Team • Created with ❤️ by Meet Dobariya
-    </footer>
-  </div>
-
-  <script>
-    // Web Audio Synthesizer for realistic Windows notification chime!
-    function playChime() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const now = audioCtx.currentTime;
-
-        const osc1 = audioCtx.createOscillator();
-        const osc2 = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(587.33, now); // D5
-        osc1.frequency.exponentialRampToValueAtTime(880.00, now + 0.12); // A5
-
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(440.00, now); // A4
-        osc2.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
-
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-
-        osc1.connect(gain);
-        osc2.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc1.start(now);
-        osc2.start(now);
-        osc1.stop(now + 0.45);
-        osc2.stop(now + 0.45);
-      } catch (e) {
-        // AudioContext not allowed before user gesture
+      @media (max-width: 720px) {
+        .mockup-body {
+          grid-template-columns: 1fr;
+          justify-items: center;
+        }
       }
-    }
 
-    // Interactive Toast Notification Simulator
-    const TOAST_MESSAGES = {
-      morning: {
-        title: "Morning Clock-In Reminder ⏰",
-        body: "It is past 10:00 AM and you have not clocked in yet! Time to clock in for your shift."
-      },
-      evening: {
-        title: "Evening Clock-Out Alert 🌙",
-        body: "It is past 7:00 PM! Don't forget to clock out for the day and enjoy your evening."
-      },
-      water: {
-        title: "Hydration Check! 💧",
-        body: "Time for a quick water break! Drink a fresh glass of water to keep your energy up."
-      },
-      stretch: {
-        title: "Stretch Your Arms! 🙆",
-        body: "Stretch your arms overhead, roll your shoulders, and loosen up your wrists."
-      },
-      posture: {
-        title: "Posture Check! 🧘",
-        body: "Straighten your back, relax your shoulders, and take a deep, slow breath."
+      /* Embedded Interactive Widget Card */
+      .widget-preview-card {
+        width: 248px;
+        height: 318px;
+        background-color: #e8fbf1;
+        border: 3px solid var(--ink);
+        border-radius: 28px;
+        box-shadow: 5px 5px 0 var(--ink);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px 12px 12px;
+        position: relative;
+        font-family: "Baloo 2", sans-serif;
+        transition: background-color 0.4s ease;
+        user-select: none;
       }
-    };
 
-    let toastTimer = null;
-    function testNotification(type) {
-      playChime();
-      const msg = TOAST_MESSAGES[type] || TOAST_MESSAGES.morning;
-      const toast = document.getElementById('win-toast');
-      const title = document.getElementById('toast-title');
-      const body = document.getElementById('toast-body');
+      .widget-preview-card.sleep {
+        background-color: #fff9e6;
+      }
 
-      title.innerText = msg.title;
-      body.innerText = msg.body;
+      .wp-header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4px;
+        height: 24px;
+      }
 
-      toast.classList.add('show');
+      .wp-date {
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--ink);
+      }
 
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        hideToast();
-      }, 5000);
-    }
+      .wp-close {
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--ink);
+        cursor: pointer;
+      }
 
-    function hideToast() {
-      const toast = document.getElementById('win-toast');
-      if (toast) toast.classList.remove('show');
-    }
+      .wp-bubble {
+        background: #ffffff;
+        border: 3px solid var(--ink);
+        border-radius: 14px;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+        max-width: 210px;
+        min-height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.25;
+        color: var(--ink);
+        box-shadow: 2px 2px 0 var(--ink);
+        position: relative;
+      }
 
-    // Mascot faces for interactive mood switcher
-    const MASCOTS = {
-      morning: {
-        fill: '#FFD84D',
-        face: `
+      .wp-bubble::after {
+        content: "";
+        position: absolute;
+        bottom: -7px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid var(--ink);
+      }
+
+      .wp-mascot-area {
+        height: 98px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .wp-svg {
+        width: 110px;
+        height: 95px;
+        overflow: visible;
+        animation: clocky-hop 2.4s ease-in-out infinite;
+        transform-origin: 60px 100px;
+      }
+
+      @keyframes clocky-hop {
+        0%,
+        75%,
+        100% {
+          transform: translateY(0) scale(1, 1);
+        }
+        85% {
+          transform: translateY(-7px) scale(0.97, 1.05);
+        }
+        92% {
+          transform: translateY(0) scale(1.05, 0.95);
+        }
+      }
+
+      .wp-time-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: -4px;
+      }
+
+      .wp-time-val {
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .wp-time-lbl {
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(43, 33, 64, 0.75);
+        margin-top: 2px;
+      }
+
+      .wp-btn {
+        width: 100%;
+        height: 42px;
+        border: 3px solid var(--ink);
+        border-radius: 16px;
+        box-shadow: 0 4px 0 var(--ink);
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--ink);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #ff8a7a;
+        transition: transform 0.08s ease;
+      }
+
+      .wp-btn:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 var(--ink);
+      }
+
+      /* Right column info */
+      .mockup-info-col {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .mockup-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .mockup-card-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-muted);
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .timer-display {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+      }
+
+      .status-badge-inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: var(--success-bg);
+        border: 1px solid var(--success-border);
+        color: var(--success);
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .diagnostic-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+      }
+
+      .diagnostic-row:last-child {
+        border-bottom: none;
+      }
+
+      .diagnostic-label {
+        color: var(--text-secondary);
+      }
+
+      .diagnostic-val {
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      /* Interactive Mood Switcher */
+      .mood-switcher-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+
+      .mood-btn {
+        background: var(--surface-subtle);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 6px 11px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .mood-btn:hover,
+      .mood-btn.active {
+        background: var(--primary);
+        color: #ffffff;
+        border-color: var(--primary);
+      }
+
+      /* REMINDERS & WELLNESS SECTION (The WOW section) */
+      .reminders-section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 48px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .reminders-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 24px;
+      }
+
+      .reminder-box {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        background: var(--surface-subtle);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.2s ease;
+      }
+
+      .reminder-box:hover {
+        border-color: var(--blue-border);
+        background: #ffffff;
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+      }
+
+      .reminder-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 12px;
+      }
+
+      .badge-morning {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+      }
+
+      .badge-evening {
+        background: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+      }
+
+      .badge-wellness {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+      }
+
+      .reminder-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+
+      .reminder-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin-bottom: 12px;
+      }
+
+      .reminder-rule {
+        font-size: 11px;
+        font-family: "JetBrains Mono", monospace;
+        color: var(--text-muted);
+        background: rgba(15, 23, 42, 0.05);
+        padding: 6px 10px;
+        border-radius: 6px;
+        line-height: 1.4;
+      }
+
+      /* Live Notification Tester Bar */
+      .tester-card {
+        margin-top: 24px;
+        background: #0f172a;
+        border-radius: 12px;
+        padding: 20px 24px;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .tester-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .tester-title {
+        font-size: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tester-btns {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .test-pill-btn {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f8fafc;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .test-pill-btn:hover {
+        background: #38bdf8;
+        color: #0f172a;
+        border-color: #38bdf8;
+        transform: translateY(-1px);
+      }
+
+      /* Interactive Windows 11 Notification Toast */
+      .toast-container {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 9999;
+        pointer-events: none;
+      }
+
+      .win-toast {
+        width: 340px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 12px;
+        box-shadow:
+          0 16px 36px -4px rgba(15, 23, 42, 0.18),
+          0 4px 12px -2px rgba(15, 23, 42, 0.08);
+        padding: 14px 16px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        pointer-events: auto;
+        transform: translateX(400px);
+        opacity: 0;
+        transition:
+          transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+          opacity 0.35s ease;
+      }
+
+      .win-toast.show {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      .toast-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #0f172a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .toast-content {
+        flex: 1;
+      }
+
+      .toast-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2px;
+      }
+
+      .toast-app-name {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .toast-time {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+
+      .toast-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 2px;
+      }
+
+      .toast-body {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.35;
+      }
+
+      .toast-close {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 14px;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 1;
+      }
+
+      /* A Day in the Office Timeline */
+      .timeline-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 48px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .timeline {
+        position: relative;
+        margin-top: 24px;
+        padding-left: 28px;
+      }
+
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        bottom: 10px;
+        width: 2px;
+        background: var(--border);
+      }
+
+      .timeline-node {
+        position: relative;
+        margin-bottom: 20px;
+      }
+
+      .timeline-node:last-child {
+        margin-bottom: 0;
+      }
+
+      .timeline-dot {
+        position: absolute;
+        left: -28px;
+        top: 4px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 3px solid var(--blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .timeline-time {
+        font-size: 12px;
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        color: var(--blue);
+        margin-bottom: 2px;
+      }
+
+      .timeline-heading {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 2px;
+      }
+
+      .timeline-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.45;
+      }
+
+      /* Comparison Table */
+      .comparison-section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 48px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .comp-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        font-size: 13px;
+      }
+
+      .comp-table th,
+      .comp-table td {
+        padding: 12px 14px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .comp-table th {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--text-muted);
+        background: var(--surface-subtle);
+      }
+
+      .comp-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .feature-name {
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .bad-cell {
+        color: #991b1b;
+        font-weight: 500;
+      }
+
+      .good-cell {
+        color: #15803d;
+        font-weight: 700;
+      }
+
+      /* Features Grid */
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 48px;
+      }
+
+      .feature-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.15s ease;
+      }
+
+      .feature-card:hover {
+        border-color: var(--border-focus);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+      }
+
+      .icon-box {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: var(--surface-subtle);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        margin-bottom: 14px;
+      }
+
+      .feature-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--text);
+      }
+
+      .feature-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      /* Setup Guide Card */
+      .setup-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 28px;
+        margin-bottom: 48px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .setup-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text);
+      }
+
+      .steps-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .step-item {
+        display: flex;
+        gap: 14px;
+      }
+
+      .step-num {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--surface-subtle);
+        border: 1px solid var(--border);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      .step-content {
+        flex: 1;
+      }
+
+      .step-heading {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--text);
+      }
+
+      .step-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: auto;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toast-container">
+      <div class="win-toast" id="win-toast">
+        <div class="toast-icon">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+        </div>
+        <div class="toast-content">
+          <div class="toast-header-row">
+            <span class="toast-app-name">Clocky Reminder</span>
+            <span class="toast-time">just now</span>
+          </div>
+          <div class="toast-title" id="toast-title">Clock-In Reminder</div>
+          <div class="toast-body" id="toast-body">
+            It is past 10:00 AM! Don't forget to clock in for your shift.
+          </div>
+        </div>
+        <button class="toast-close" onclick="hideToast()">✕</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <header>
+        <div class="app-icon-wrapper">
+          <img
+            src="app-icon.png"
+            alt="Clocky App Icon"
+            class="app-icon-img"
+            width="88"
+            height="88"
+          />
+        </div>
+        <div>
+          <div class="version-badge">
+            <span class="status-dot"></span>
+            <span id="version-text">v1.0.0 • Native Windows 10 & 11 App</span>
+          </div>
+        </div>
+        <h1>Clocky for Windows</h1>
+        <p class="tagline">
+          Say goodbye to forgotten punches and messy browser tabs. Clocky is the
+          delightful desktop attendance companion that sits quietly on your
+          screen, protects your check-in streaks, and cares for your health with
+          timely nudges.
+        </p>
+        <div class="cta-group">
+          <a
+            href="https://github.com/MeetDobariya437/Clockly/releases/download/v1.0.0/Clocky_1.0.0_x64-setup.exe"
+            class="btn btn-primary"
+            id="download-exe"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download for Windows (.exe)
+          </a>
+          <a
+            href="https://github.com/MeetDobariya437/Clockly/releases"
+            class="btn btn-secondary"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+              />
+            </svg>
+            View on GitHub
+          </a>
+        </div>
+        <p class="meta-note">
+          Windows 10 & 11 (64-bit) • Under 10 MB • Instant Launch • Zero Bloat
+        </p>
+      </header>
+
+      <!-- Interactive Product UI Showcase -->
+      <div class="preview-section">
+        <div class="mockup-header">
+          <div class="header-left">
+            <span class="win-logo">⊞</span>
+            <span style="font-weight: 600; color: #f8fafc"
+              >Clocky Desktop Companion</span
+            >
+            <span>Pinned to Wallpaper</span>
+            <span>System Tray Active</span>
+          </div>
+          <div class="header-right">
+            <div class="active-ticker-pill">
+              <span class="active-dot"></span>
+              <span id="header-timer">04:14:21</span>
+            </div>
+            <span>Fri 10:42 AM</span>
+          </div>
+        </div>
+        <div class="mockup-body">
+          <!-- Live Clocky Widget Simulator -->
+          <div class="widget-preview-card" id="widget-card">
+            <div class="wp-header">
+              <span class="wp-date">Tue, Nov 3</span>
+              <button class="wp-close" title="Hide widget">x</button>
+            </div>
+            <div class="wp-bubble" id="widget-bubble">
+              Clocked in and rolling! Looking good today.
+            </div>
+            <div class="wp-mascot-area" id="widget-mascot">
+              <!-- Dynamic SVG injected by JS -->
+            </div>
+            <div class="wp-time-area">
+              <div class="wp-time-val" id="widget-timer">04:14:21</div>
+              <div class="wp-time-lbl" id="widget-status-lbl">worked today</div>
+            </div>
+            <button class="wp-btn" id="widget-action-btn">Clock Out</button>
+          </div>
+
+          <!-- Live Diagnostics & Mood Controls -->
+          <div class="mockup-info-col">
+            <div class="mockup-card">
+              <div class="mockup-card-title">Live Work Session</div>
+              <div class="timer-display" id="demo-timer">04:14:21</div>
+              <div class="status-badge-inline">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Clocked In • In Office
+              </div>
+            </div>
+            <div class="mockup-card">
+              <div class="mockup-card-title">Attendance Diagnostic</div>
+              <div class="diagnostic-row">
+                <span class="diagnostic-label">Office Geofence</span>
+                <span class="diagnostic-val" style="color: #15803d"
+                  >Verified (Office Coordinates)</span
+                >
+              </div>
+              <div class="diagnostic-row">
+                <span class="diagnostic-label">Location Provider</span>
+                <span class="diagnostic-val">Windows Geolocator Active</span>
+              </div>
+              <div class="diagnostic-row">
+                <span class="diagnostic-label">Credentials Storage</span>
+                <span class="diagnostic-val"
+                  >Windows Credential Locker (Secure)</span
+                >
+              </div>
+              <div class="diagnostic-row">
+                <span class="diagnostic-label">Health Reminders</span>
+                <span class="diagnostic-val"
+                  >Water & Stretch Alerts Active</span
+                >
+              </div>
+            </div>
+            <div class="mockup-card">
+              <div class="mockup-card-title">Test Clocky's Shifting Moods</div>
+              <div class="mood-switcher-row">
+                <button class="mood-btn" onclick="setMood('morning')">
+                  ☀️ Morning
+                </button>
+                <button class="mood-btn active" onclick="setMood('midday')">
+                  💻 Midday
+                </button>
+                <button class="mood-btn" onclick="setMood('afternoon')">
+                  🥱 Afternoon
+                </button>
+                <button class="mood-btn" onclick="setMood('overtime')">
+                  🔥 Overtime
+                </button>
+                <button class="mood-btn" onclick="setMood('done')">
+                  🌙 Shift Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THE WOW SECTION: Smart Reminders & Wellness Engine -->
+      <div class="reminders-section">
+        <div class="section-header">
+          <div class="section-eyebrow">Zero Forgotten Punches • 100% Care</div>
+          <div class="section-title">
+            The Intelligent Reminder & Wellness Engine
+          </div>
+          <div class="section-subtitle">
+            Never miss a check-in or check-out again. Clocky keeps watch so HR
+            never has to flag you.
+          </div>
+        </div>
+
+        <div class="reminders-grid">
+          <!-- Morning Check-in -->
+          <div class="reminder-box">
+            <span class="reminder-badge badge-morning">⏰ Morning Guard</span>
+            <div class="reminder-title">10:00 AM Check-In Reminder</div>
+            <div class="reminder-desc">
+              If 10:00 AM arrives and you haven't punched in yet, Clocky sends a
+              gentle reminder every 10 minutes until you check in.
+            </div>
+            <div class="reminder-rule">
+              Rule: After 10:00 AM • Every 10 min • Stops immediately when
+              clocked in
+            </div>
+          </div>
+
+          <!-- Evening Check-out -->
+          <div class="reminder-box">
+            <span class="reminder-badge badge-evening"
+              >🌙 Evening Sentinel</span
+            >
+            <div class="reminder-title">7:00 PM Clock-Out Alert</div>
+            <div class="reminder-desc">
+              Finished your shift? Starting at 7:00 PM, Clocky alerts you every
+              10 minutes so you never leave the office without clocking out.
+            </div>
+            <div class="reminder-rule">
+              Rule: From 7:00 PM • Every 10 min • Stops immediately upon clock
+              out
+            </div>
+          </div>
+
+          <!-- Hydration Checks -->
+          <div class="reminder-box">
+            <span class="reminder-badge badge-wellness"
+              >💧 Hydration Nudge</span
+            >
+            <div class="reminder-title">Drink Water Reminders</div>
+            <div class="reminder-desc">
+              Long meetings and coding marathons can dry you out. Clocky prompts
+              you to grab a fresh glass of water every 60 minutes.
+            </div>
+            <div class="reminder-rule">
+              Cadence: Every 60 min while working • Auto-pauses after shift
+            </div>
+          </div>
+
+          <!-- Desk Mobility & Stretch -->
+          <div class="reminder-box">
+            <span class="reminder-badge badge-wellness"
+              >🙆 Mobility & Stretch</span
+            >
+            <div class="reminder-title">Arm & Shoulder Stretches</div>
+            <div class="reminder-desc">
+              Loosen tight wrists, roll your shoulders back, and unbend your
+              spine with quick micro-break stretch prompts.
+            </div>
+            <div class="reminder-rule">
+              Prompts: Overhead stretch • Shoulder rolls • Posture reset
+            </div>
+          </div>
+
+          <!-- Eye Care 20-20-20 -->
+          <div class="reminder-box">
+            <span class="reminder-badge badge-wellness"
+              >👀 Eye Health Care</span
+            >
+            <div class="reminder-title">20-20-20 Visual Breaks</div>
+            <div class="reminder-desc">
+              Look at something 20 feet away for 20 seconds to prevent screen
+              fatigue and keep your vision sharp all day.
+            </div>
+            <div class="reminder-rule">
+              Benefit: Prevents headaches, eye strain, and dry eyes
+            </div>
+          </div>
+
+          <!-- Clean Day-End Protection -->
+          <div class="reminder-box">
+            <span class="reminder-badge badge-morning"
+              >🛡️ Zero Disturbance</span
+            >
+            <div class="reminder-title">Auto-Stop & No Spam</div>
+            <div class="reminder-desc">
+              The instant you clock in or out, all alerts stop. When your shift
+              ends, buttons are removed and Clocky peacefully sleeps.
+            </div>
+            <div class="reminder-rule">
+              Behavior: Native Windows toast only • Zero window focus theft
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Notification Tester Interactive Bar -->
+        <div class="tester-card">
+          <div class="tester-top">
+            <div class="tester-title">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#38bdf8"
+                stroke-width="2.5"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              Interactive Toast Tester (Click to Preview Windows Notifications)
+            </div>
+            <span style="font-size: 12px; color: #94a3b8"
+              >Includes authentic sound chime!</span
+            >
+          </div>
+          <div class="tester-btns">
+            <button class="test-pill-btn" onclick="testNotification('morning')">
+              🔔 Test 10:00 AM Nag
+            </button>
+            <button class="test-pill-btn" onclick="testNotification('evening')">
+              🌙 Test 7:00 PM Nag
+            </button>
+            <button class="test-pill-btn" onclick="testNotification('water')">
+              💧 Test Water Break
+            </button>
+            <button class="test-pill-btn" onclick="testNotification('stretch')">
+              🙆 Test Arm Stretch
+            </button>
+            <button class="test-pill-btn" onclick="testNotification('posture')">
+              🧘 Test Posture Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- A Day in the Office Timeline -->
+      <div class="timeline-card">
+        <div class="section-header" style="text-align: left; margin-bottom: 0">
+          <div class="section-eyebrow">Workday Journey</div>
+          <div class="section-title">A Day in the Office with Clocky</div>
+        </div>
+        <div class="timeline">
+          <div class="timeline-node">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">09:50 AM — Arrival at Office</div>
+            <div class="timeline-heading">Clocky is Curled Up Asleep</div>
+            <div class="timeline-text">
+              Sitting quietly on your wallpaper. Peaceful lavender mascot with
+              floating zZz. Ready when you are.
+            </div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">10:00 AM — Morning Clock-In Guard</div>
+            <div class="timeline-heading">
+              Gentle Reminder Fires If Not Clocked In
+            </div>
+            <div class="timeline-text">
+              If you're making coffee or chatting, Clocky sends a desktop
+              notification every 10 minutes so your on-time streak stays
+              spotless.
+            </div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">10:05 AM — 1-Click Punch In</div>
+            <div class="timeline-heading">
+              Instant Geofence Verification & Mascot Wakes Up!
+            </div>
+            <div class="timeline-text">
+              Click "Clock In" — Windows Geolocator verifies you're at the
+              office. Clocky bursts into happy butter yellow with sparkling big
+              eyes!
+            </div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">02:30 PM — Afternoon Recharge</div>
+            <div class="timeline-heading">
+              Hydration Check & Focused Expression
+            </div>
+            <div class="timeline-text">
+              "Hydration check! Drink a glass of fresh water to keep your energy
+              up." Clocky transitions into a steady, focused work expression.
+            </div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">05:00 PM — Desk Mobility Check</div>
+            <div class="timeline-heading">Stretch Overhead & Eye Rest</div>
+            <div class="timeline-text">
+              Clocky nudges you to roll your shoulders and rest your eyes before
+              the evening sprint.
+            </div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">07:00 PM — Shift Completed Guard</div>
+            <div class="timeline-heading">Clock-Out Alert Activates</div>
+            <div class="timeline-text">
+              "It's past 7:00 PM! Don't forget to clock out for the day."
+              Prevents forgotten evening punches.
+            </div>
+          </div>
+          <div class="timeline-node">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">07:15 PM — Clock Out & Day End</div>
+            <div class="timeline-heading">
+              Buttons Disappear & Clocky Sleeps Contentedly
+            </div>
+            <div class="timeline-text">
+              1-Click Clock Out! Action buttons are safely removed on day end.
+              Clocky curls back into lavender sleep with happy curved eyes (^
+              ^). See you tomorrow!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Section: Why Clocky Beats the Old Way -->
+      <div class="comparison-section">
+        <div class="section-header">
+          <div class="section-eyebrow">The Upgrade You Deserve</div>
+          <div class="section-title">
+            Browser HRMS Portal vs. Clocky Desktop
+          </div>
+        </div>
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Experience Feature</th>
+              <th>Old Web Portal</th>
+              <th>Clocky for Windows</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="feature-name">Punch In / Out Speed</td>
+              <td class="bad-cell">Open browser, 6 clicks, slow loads</td>
+              <td class="good-cell">1-Click instant desktop button</td>
+            </tr>
+            <tr>
+              <td class="feature-name">Forgotten Check-In Prevention</td>
+              <td class="bad-cell">None (HR flags you later)</td>
+              <td class="good-cell">10:00 AM smart nag every 10 min</td>
+            </tr>
+            <tr>
+              <td class="feature-name">Forgotten Check-Out Prevention</td>
+              <td class="bad-cell">None (shift remains open)</td>
+              <td class="good-cell">7:00 PM evening alert every 10 min</td>
+            </tr>
+            <tr>
+              <td class="feature-name">Health & Wellness Nudges</td>
+              <td class="bad-cell">None</td>
+              <td class="good-cell">Hydration, arm stretch & posture alerts</td>
+            </tr>
+            <tr>
+              <td class="feature-name">Mood Mascot</td>
+              <td class="bad-cell">Boring tabular portal</td>
+              <td class="good-cell">Adorable expressive companion</td>
+            </tr>
+            <tr>
+              <td class="feature-name">Memory & Resource Usage</td>
+              <td class="bad-cell">Heavy browser tab (~250 MB RAM)</td>
+              <td class="good-cell">
+                Tiny native Rust/Tauri core (&lt;25 MB RAM)
+              </td>
+            </tr>
+            <tr>
+              <td class="feature-name">Credentials Security</td>
+              <td class="bad-cell">Browser cache / plain storage</td>
+              <td class="good-cell">Windows Credential Locker (Encrypted)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 6 Features Grid -->
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+          </div>
+          <div class="feature-title">Always on Desktop & Tray</div>
+          <div class="feature-desc">
+            Sits directly on your wallpaper. Win+D and 3-finger swipe proof.
+            Never steals Alt+Tab focus or clutters taskbar.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"
+              />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+          <div class="feature-title">Office Geofence Verification</div>
+          <div class="feature-desc">
+            Integrated Windows Geolocator verifies proximity to office
+            coordinates automatically with fast 2.5s fallback.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+              <line x1="9" y1="9" x2="9.01" y2="9" />
+              <line x1="15" y1="9" x2="15.01" y2="9" />
+            </svg>
+          </div>
+          <div class="feature-title">Dynamic Mascot Expressions</div>
+          <div class="feature-desc">
+            Clocky smoothly evolves moods throughout the day—from cheerful
+            morning bounce to evening overtime fatigue.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
+          <div class="feature-title">10 AM & 7 PM Shift Reminders</div>
+          <div class="feature-desc">
+            Nags after 10 AM every 10 min until you clock in, and from 7 PM
+            until you clock out. Stops immediately when actioned.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+            </svg>
+          </div>
+          <div class="feature-title">Hydration & Stretch Alerts</div>
+          <div class="feature-desc">
+            Stay healthy with periodic reminders to drink fresh water, stretch
+            your arms overhead, reset posture, and rest your eyes.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </div>
+          <div class="feature-title">Windows Credential Locker</div>
+          <div class="feature-desc">
+            Zero plaintext tokens. Your login session is encrypted securely
+            inside the OS keychain with automatic token refresh.
+          </div>
+        </div>
+      </div>
+
+      <!-- First-Time Quick Setup Guide -->
+      <div class="setup-card">
+        <div class="setup-title">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          First-Time Quick Setup (Windows)
+        </div>
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <div class="step-heading">Download & Run the Setup</div>
+              <div class="step-text">
+                Download <code>Clocky_1.0.0_x64-setup.exe</code> and run the
+                installer. Clocky is an ultra-lightweight app under 10 MB and
+                installs in seconds.
+              </div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <div class="step-heading">Sign In Once with Your HRMS Email</div>
+              <div class="step-text">
+                Enter your office email and password. Your credentials are
+                securely locked in Windows Credential Manager so you never have
+                to re-login.
+              </div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <div class="step-heading">Enjoy Effortless Attendance!</div>
+              <div class="step-text">
+                Clocky autostarts with Windows, sits quietly in your
+                tray/desktop, and takes care of your punches, reminders, and
+                wellness breaks.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        Internal Office Distribution • HRMS Engineering Team • Created with ❤️
+        by Meet Dobariya
+      </footer>
+    </div>
+
+    <script>
+      // Web Audio Synthesizer for realistic Windows notification chime!
+      function playChime() {
+        try {
+          const audioCtx = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
+          const now = audioCtx.currentTime;
+
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc1.type = "sine";
+          osc1.frequency.setValueAtTime(587.33, now); // D5
+          osc1.frequency.exponentialRampToValueAtTime(880.0, now + 0.12); // A5
+
+          osc2.type = "sine";
+          osc2.frequency.setValueAtTime(440.0, now); // A4
+          osc2.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
+
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.45);
+          osc2.stop(now + 0.45);
+        } catch (e) {
+          // AudioContext not allowed before user gesture
+        }
+      }
+
+      // Interactive Toast Notification Simulator
+      const TOAST_MESSAGES = {
+        morning: {
+          title: "Morning Clock-In Reminder ⏰",
+          body: "It is past 10:00 AM and you have not clocked in yet! Time to clock in for your shift.",
+        },
+        evening: {
+          title: "Evening Clock-Out Alert 🌙",
+          body: "It is past 7:00 PM! Don't forget to clock out for the day and enjoy your evening.",
+        },
+        water: {
+          title: "Hydration Check! 💧",
+          body: "Time for a quick water break! Drink a fresh glass of water to keep your energy up.",
+        },
+        stretch: {
+          title: "Stretch Your Arms! 🙆",
+          body: "Stretch your arms overhead, roll your shoulders, and loosen up your wrists.",
+        },
+        posture: {
+          title: "Posture Check! 🧘",
+          body: "Straighten your back, relax your shoulders, and take a deep, slow breath.",
+        },
+      };
+
+      let toastTimer = null;
+      function testNotification(type) {
+        playChime();
+        const msg = TOAST_MESSAGES[type] || TOAST_MESSAGES.morning;
+        const toast = document.getElementById("win-toast");
+        const title = document.getElementById("toast-title");
+        const body = document.getElementById("toast-body");
+
+        title.innerText = msg.title;
+        body.innerText = msg.body;
+
+        toast.classList.add("show");
+
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          hideToast();
+        }, 5000);
+      }
+
+      function hideToast() {
+        const toast = document.getElementById("win-toast");
+        if (toast) toast.classList.remove("show");
+      }
+
+      // Mascot faces for interactive mood switcher
+      const MASCOTS = {
+        morning: {
+          fill: "#FFD84D",
+          face: `
           <circle cx="44" cy="50" r="6" fill="#2B2140" />
           <circle cx="42" cy="48" r="2.2" fill="#FFFFFF" />
           <circle cx="46.5" cy="51.5" r="1.1" fill="#FFFFFF" />
@@ -1522,28 +1847,28 @@
           <path d="M50 63 Q60 74 70 63" fill="#2B2140" stroke="#2B2140" stroke-width="2" stroke-linecap="round" />
           <path d="M53 65 Q60 72 67 65" fill="#FF8A7A" />
         `,
-        bubble: "Bounce! Ready to conquer the workday! ☀️",
-        cardClass: "",
-        btnText: "Clock Out",
-        btnColor: "#FF8A7A",
-      },
-      midday: {
-        fill: '#FFD84D',
-        face: `
+          bubble: "Bounce! Ready to conquer the workday! ☀️",
+          cardClass: "",
+          btnText: "Clock Out",
+          btnColor: "#FF8A7A",
+        },
+        midday: {
+          fill: "#FFD84D",
+          face: `
           <circle cx="44" cy="50" r="5.5" fill="#2B2140" />
           <circle cx="42.5" cy="48" r="2" fill="#FFFFFF" />
           <circle cx="76" cy="50" r="5.5" fill="#2B2140" />
           <circle cx="74.5" cy="48" r="2" fill="#FFFFFF" />
           <path d="M52 64 Q60 72 68 64" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" />
         `,
-        bubble: "In the zone! Working steadily. 💻",
-        cardClass: "",
-        btnText: "Clock Out",
-        btnColor: "#FF8A7A",
-      },
-      afternoon: {
-        fill: '#FFD84D',
-        face: `
+          bubble: "In the zone! Working steadily. 💻",
+          cardClass: "",
+          btnText: "Clock Out",
+          btnColor: "#FF8A7A",
+        },
+        afternoon: {
+          fill: "#FFD84D",
+          face: `
           <circle cx="44" cy="51" r="5.5" fill="#2B2140" />
           <circle cx="43" cy="51" r="1.8" fill="#FFFFFF" />
           <path d="M37 46 Q44 49 51 46" fill="none" stroke="#2B2140" stroke-width="3" stroke-linecap="round" />
@@ -1553,28 +1878,28 @@
           <path d="M53 65 Q57 63 61 65 Q65 67 67 65" fill="none" stroke="#2B2140" stroke-width="3" stroke-linecap="round" />
           <path d="M85 32 C85 32 88 36 88 38 C88 40 86.5 41.5 85 41.5 C83.5 41.5 82 40 82 38 C82 36 85 32 85 32 Z" fill="#60A5FA" />
         `,
-        bubble: "Remember to take a sip of water & stretch! 💧",
-        cardClass: "",
-        btnText: "Clock Out",
-        btnColor: "#FF8A7A",
-      },
-      overtime: {
-        fill: '#FFBA7A',
-        face: `
+          bubble: "Remember to take a sip of water & stretch! 💧",
+          cardClass: "",
+          btnText: "Clock Out",
+          btnColor: "#FF8A7A",
+        },
+        overtime: {
+          fill: "#FFBA7A",
+          face: `
           <path d="M37 47 L48 52 L37 57" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M83 47 L72 52 L83 57" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
           <ellipse cx="60" cy="65" rx="5" ry="6" fill="#2B2140" />
           <path d="M57 67 Q60 70 63 67" fill="#FF8A7A" />
           <path d="M88 28 C88 28 92 33 92 36 C92 38.5 90 40 88 40 C86 40 84 38.5 84 36 C84 33 88 28 88 28 Z" fill="#60A5FA" />
         `,
-        bubble: "Past 7 PM! Time to clock out and rest! 🔥",
-        cardClass: "",
-        btnText: "Clock Out",
-        btnColor: "#FF8A7A",
-      },
-      done: {
-        fill: '#B9A7FF',
-        face: `
+          bubble: "Past 7 PM! Time to clock out and rest! 🔥",
+          cardClass: "",
+          btnText: "Clock Out",
+          btnColor: "#FF8A7A",
+        },
+        done: {
+          fill: "#B9A7FF",
+          face: `
           <path d="M38 52 Q44 44 50 52" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" />
           <path d="M70 52 Q76 44 82 52" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" />
           <path d="M54 63 Q60 68 66 63" fill="none" stroke="#2B2140" stroke-width="3" stroke-linecap="round" />
@@ -1584,16 +1909,16 @@
             <text x="104" y="12" font-family="'Baloo 2'" font-weight="800" font-size="20" fill="#2B2140">Z</text>
           </g>
         `,
-        bubble: "Shift completed! Have a wonderful evening. 🌙",
-        cardClass: "sleep",
-        btnText: "Day Complete",
-        btnColor: "rgba(43, 33, 64, 0.08)",
-      }
-    };
+          bubble: "Shift completed! Have a wonderful evening. 🌙",
+          cardClass: "sleep",
+          btnText: "Day Complete",
+          btnColor: "rgba(43, 33, 64, 0.08)",
+        },
+      };
 
-    function renderSvg(moodKey) {
-      const mood = MASCOTS[moodKey] || MASCOTS.midday;
-      return `
+      function renderSvg(moodKey) {
+        const mood = MASCOTS[moodKey] || MASCOTS.midday;
+        return `
         <svg class="wp-svg" viewBox="0 0 120 110" role="img">
           <ellipse cx="60" cy="103" rx="38" ry="4.5" fill="#2B2140" opacity="0.15" />
           <g class="clocky-blob">
@@ -1610,59 +1935,62 @@
           </g>
         </svg>
       `;
-    }
-
-    function setMood(moodKey) {
-      document.querySelectorAll('.mood-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(moodKey));
-      });
-
-      const mood = MASCOTS[moodKey];
-      const card = document.getElementById('widget-card');
-      const bubble = document.getElementById('widget-bubble');
-      const mascot = document.getElementById('widget-mascot');
-      const btn = document.getElementById('widget-action-btn');
-      const statusLbl = document.getElementById('widget-status-lbl');
-
-      mascot.innerHTML = renderSvg(moodKey);
-      bubble.innerText = mood.bubble;
-      btn.innerText = mood.btnText;
-      btn.style.backgroundColor = mood.btnColor;
-
-      if (mood.cardClass) {
-        card.classList.add(mood.cardClass);
-      } else {
-        card.classList.remove('sleep');
       }
 
-      if (moodKey === 'done') {
-        statusLbl.innerText = "shift completed today";
-        btn.style.cursor = "default";
-      } else {
-        statusLbl.innerText = "worked today";
-        btn.style.cursor = "pointer";
+      function setMood(moodKey) {
+        document.querySelectorAll(".mood-btn").forEach((btn) => {
+          btn.classList.toggle(
+            "active",
+            btn.getAttribute("onclick").includes(moodKey),
+          );
+        });
+
+        const mood = MASCOTS[moodKey];
+        const card = document.getElementById("widget-card");
+        const bubble = document.getElementById("widget-bubble");
+        const mascot = document.getElementById("widget-mascot");
+        const btn = document.getElementById("widget-action-btn");
+        const statusLbl = document.getElementById("widget-status-lbl");
+
+        mascot.innerHTML = renderSvg(moodKey);
+        bubble.innerText = mood.bubble;
+        btn.innerText = mood.btnText;
+        btn.style.backgroundColor = mood.btnColor;
+
+        if (mood.cardClass) {
+          card.classList.add(mood.cardClass);
+        } else {
+          card.classList.remove("sleep");
+        }
+
+        if (moodKey === "done") {
+          statusLbl.innerText = "shift completed today";
+          btn.style.cursor = "default";
+        } else {
+          statusLbl.innerText = "worked today";
+          btn.style.cursor = "pointer";
+        }
       }
-    }
 
-    // Initialize with Midday expression
-    setMood('midday');
+      // Initialize with Midday expression
+      setMood("midday");
 
-    // Live Ticker simulation for the preview
-    let seconds = 4 * 3600 + 14 * 60 + 21;
-    setInterval(() => {
-      seconds++;
-      const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
-      const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-      const s = String(seconds % 60).padStart(2, '0');
-      const timeStr = `${h}:${m}:${s}`;
-      
-      const el1 = document.getElementById('demo-timer');
-      const el2 = document.getElementById('header-timer');
-      const el3 = document.getElementById('widget-timer');
-      if (el1) el1.innerText = timeStr;
-      if (el2) el2.innerText = timeStr;
-      if (el3) el3.innerText = timeStr;
-    }, 1000);
-  </script>
-</body>
+      // Live Ticker simulation for the preview
+      let seconds = 4 * 3600 + 14 * 60 + 21;
+      setInterval(() => {
+        seconds++;
+        const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+        const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+        const s = String(seconds % 60).padStart(2, "0");
+        const timeStr = `${h}:${m}:${s}`;
+
+        const el1 = document.getElementById("demo-timer");
+        const el2 = document.getElementById("header-timer");
+        const el3 = document.getElementById("widget-timer");
+        if (el1) el1.innerText = timeStr;
+        if (el2) el2.innerText = timeStr;
+        if (el3) el3.innerText = timeStr;
+      }, 1000);
+    </script>
+  </body>
 </html>
