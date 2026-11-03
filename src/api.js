@@ -20,12 +20,11 @@ export async function getSavedToken() {
     return sessionStorage.getItem('clocky_browser_token');
   }
   try {
-    const token = await invoke('keychain_get_token');
-    if (token) return token;
+    return await invoke('keychain_get_token');
   } catch (err) {
-    console.warn('Keyring not available on this platform, checking local storage:', err);
+    console.error('Failed to read token from keychain:', err);
+    return null;
   }
-  return localStorage.getItem('clocky_app_token');
 }
 
 export async function saveToken(token) {
@@ -36,13 +35,12 @@ export async function saveToken(token) {
   try {
     await invoke('keychain_save_token', { token });
   } catch (err) {
-    console.warn('Keyring save failed on mobile/platform, saving to local app storage:', err);
-    localStorage.setItem('clocky_app_token', token);
+    console.error('Failed to save token to keychain:', err);
+    throw new Error('Could not securely store credentials in keychain.');
   }
 }
 
 export async function deleteToken() {
-  localStorage.removeItem('clocky_app_token');
   if (!isTauri) {
     sessionStorage.removeItem('clocky_browser_token');
     return;
@@ -50,7 +48,7 @@ export async function deleteToken() {
   try {
     await invoke('keychain_delete_token');
   } catch (err) {
-    console.warn('Failed to remove token from keychain:', err);
+    console.error('Failed to remove token from keychain:', err);
   }
 }
 
