@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "platform": "Windows 10 / 11 (x64)",
-  "downloadUrl": "https://github.com/MeetDobariya437/Clockly/releases/download/v1.0.0/Clocky_1.0.0_x64-setup.exe",
+  "platforms": ["Windows 10/11 (x64)", "Android (aarch64)"],
+  "windowsDownloadUrl": "https://github.com/MeetDobariya437/Clockly/releases/download/v1.0.0/Clocky_1.0.0_x64-setup.exe",
+  "androidDownloadUrl": "https://github.com/MeetDobariya437/Clockly/releases",
   "releaseUrl": "https://github.com/MeetDobariya437/Clockly/releases"
 }
-
