@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clocky for Windows — Smart HRMS Attendance Widget</title>
+  <meta name="description" content="Native Windows desktop widget for HRMS attendance tracking, 1-click punch in/out, office geofence verification, shift reminders, and hydration alerts.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="app-icon.png">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --border: #e2e8f0;
+      --border-focus: #cbd5e1;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --primary: #0f172a;
+      --primary-hover: #1e293b;
+      --blue: #2563eb;
+      --blue-subtle: #eff6ff;
+      --blue-border: #bfdbfe;
+      --success: #15803d;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+      --ink: #2B2140;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 20px;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 840px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+
+    .app-icon-wrapper {
+      margin-bottom: 24px;
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+
+    .app-icon-wrapper:hover {
+      transform: translateY(-2px);
+    }
+
+    .app-icon-img {
+      display: block;
+      border-radius: 22px;
+      box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.16), 0 4px 8px -2px rgba(15, 23, 42, 0.08);
+    }
+
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+
+    h1 {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .tagline {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
+
+    /* Actions */
+    .cta-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(15, 23, 42, 0.2);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-subtle);
+      border-color: var(--border-focus);
+      transform: translateY(-1px);
+    }
+
+    .meta-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 14px;
+    }
+
+    /* Showcase Preview */
+    .preview-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .mockup-header {
+      background: #1e293b;
+      color: #94a3b8;
+      padding: 10px 16px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #cbd5e1;
+    }
+
+    .win-logo {
+      font-size: 14px;
+      color: #38bdf8;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .active-ticker-pill {
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .active-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+
+    .mockup-body {
+      padding: 28px 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      background: #fafafa;
+      align-items: center;
+    }
+
+    @media (max-width: 720px) {
+      .mockup-body {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+    }
+
+    /* Embedded Interactive Widget Card */
+    .widget-preview-card {
+      width: 248px;
+      height: 318px;
+      background-color: #E8FBF1;
+      border: 3px solid var(--ink);
+      border-radius: 28px;
+      box-shadow: 5px 5px 0 var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px 12px 12px;
+      position: relative;
+      font-family: 'Baloo 2', sans-serif;
+      transition: background-color 0.4s ease;
+      user-select: none;
+    }
+
+    .widget-preview-card.sleep {
+      background-color: #FFF9E6;
+    }
+
+    .wp-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      height: 24px;
+    }
+
+    .wp-date {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .wp-close {
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .wp-bubble {
+      background: #FFFFFF;
+      border: 3px solid var(--ink);
+      border-radius: 14px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      max-width: 210px;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.25;
+      color: var(--ink);
+      box-shadow: 2px 2px 0 var(--ink);
+      position: relative;
+    }
+
+    .wp-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--ink);
+    }
+
+    .wp-mascot-area {
+      height: 98px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .wp-svg {
+      width: 110px;
+      height: 95px;
+      overflow: visible;
+      animation: clocky-hop 2.4s ease-in-out infinite;
+      transform-origin: 60px 100px;
+    }
+
+    @keyframes clocky-hop {
+      0%, 75%, 100% { transform: translateY(0) scale(1, 1); }
+      85% { transform: translateY(-7px) scale(0.97, 1.05); }
+      92% { transform: translateY(0) scale(1.05, 0.95); }
+    }
+
+    .wp-time-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: -4px;
+    }
+
+    .wp-time-val {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wp-time-lbl {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(43, 33, 64, 0.75);
+      margin-top: 2px;
+    }
+
+    .wp-btn {
+      width: 100%;
+      height: 42px;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      box-shadow: 0 4px 0 var(--ink);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #FF8A7A;
+      transition: transform 0.08s ease;
+    }
+
+    .wp-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 var(--ink);
+    }
+
+    /* Right column info */
+    .mockup-info-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mockup-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mockup-card-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .timer-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .status-badge-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .diagnostic-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .diagnostic-row:last-child {
+      border-bottom: none;
+    }
+
+    .diagnostic-label {
+      color: var(--text-secondary);
+    }
+
+    .diagnostic-val {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Interactive Mood Switcher */
+    .mood-switcher-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .mood-btn {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .mood-btn:hover, .mood-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-md);
+    }
+
+    .icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      margin-bottom: 14px;
+    }
+
+    .feature-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Setup Guide Card */
+    .setup-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .setup-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+    }
+
+    .steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 14px;
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-heading {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .step-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="app-icon-wrapper">
+        <img src="app-icon.png" alt="Clocky App Icon" class="app-icon-img" width="88" height="88">
+      </div>
+      <div>
+        <div class="version-badge">
+          <span class="status-dot"></span>
+          <span id="version-text">v1.0.0 • Windows 10 & 11</span>
+        </div>
+      </div>
+      <h1>Clocky for Windows</h1>
+      <p class="tagline">
+        Track your work hours, 1-click punch in/out with company geolocation, stay notified with shift reminders, and enjoy dynamic mascot moods right on your desktop.
+      </p>
+      <div class="cta-group">
+        <a href="https://github.com/MeetDobariya437/Clockly/releases/download/v1.0.0/Clocky_1.0.0_x64-setup.exe" class="btn btn-primary" id="download-exe">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download for Windows (.exe)
+        </a>
+        <a href="https://github.com/MeetDobariya437/Clockly/releases" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          View on GitHub
+        </a>
+      </div>
+      <p class="meta-note">Windows 10, 11 (64-bit) • Instant Launch • Under 10 MB • Stays in Desktop & Tray</p>
+    </header>
+
+    <!-- Interactive Product UI Showcase -->
+    <div class="preview-section">
+      <div class="mockup-header">
+        <div class="header-left">
+          <span class="win-logo">⊞</span>
+          <span style="font-weight: 600; color: #f8fafc;">Clocky Attendance Widget</span>
+          <span>Desktop Mode</span>
+          <span>Tray Active</span>
+        </div>
+        <div class="header-right">
+          <div class="active-ticker-pill">
+            <span class="active-dot"></span>
+            <span id="header-timer">04:14:21</span>
+          </div>
+          <span>Fri 10:42 AM</span>
+        </div>
+      </div>
+      <div class="mockup-body">
+        
+        <!-- Live Clocky Widget Simulator -->
+        <div class="widget-preview-card" id="widget-card">
+          <div class="wp-header">
+            <span class="wp-date">Tue, Nov 3</span>
+            <button class="wp-close" title="Hide widget">x</button>
+          </div>
+          <div class="wp-bubble" id="widget-bubble">
+            Clocked in and rolling! Looking good today.
+          </div>
+          <div class="wp-mascot-area" id="widget-mascot">
+            <!-- Dynamic SVG injected by JS -->
+          </div>
+          <div class="wp-time-area">
+            <div class="wp-time-val" id="widget-timer">04:14:21</div>
+            <div class="wp-time-lbl" id="widget-status-lbl">worked today</div>
+          </div>
+          <button class="wp-btn" id="widget-action-btn">Clock Out</button>
+        </div>
+
+        <!-- Live Diagnostics & Mood Controls -->
+        <div class="mockup-info-col">
+          <div class="mockup-card">
+            <div class="mockup-card-title">Live Work Session</div>
+            <div class="timer-display" id="demo-timer">04:14:21</div>
+            <div class="status-badge-inline">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Clocked In • In Office
+            </div>
+          </div>
+          <div class="mockup-card">
+            <div class="mockup-card-title">Attendance Diagnostic</div>
+            <div class="diagnostic-row">
+              <span class="diagnostic-label">Office Geofence</span>
+              <span class="diagnostic-val" style="color: #15803d;">Verified (Office Coordinates)</span>
+            </div>
+            <div class="diagnostic-row">
+              <span class="diagnostic-label">Location Provider</span>
+              <span class="diagnostic-val">Windows Geolocator Active</span>
+            </div>
+            <div class="diagnostic-row">
+              <span class="diagnostic-label">Credentials Storage</span>
+              <span class="diagnostic-val">Windows Credential Locker (Secure)</span>
+            </div>
+            <div class="diagnostic-row">
+              <span class="diagnostic-label">Health Reminders</span>
+              <span class="diagnostic-val">Water & Stretch Alerts On</span>
+            </div>
+          </div>
+          <div class="mockup-card">
+            <div class="mockup-card-title">Try Clocky's Daily Expressions</div>
+            <div class="mood-switcher-row">
+              <button class="mood-btn" onclick="setMood('morning')">☀️ Morning</button>
+              <button class="mood-btn active" onclick="setMood('midday')">💻 Midday</button>
+              <button class="mood-btn" onclick="setMood('afternoon')">🥱 Afternoon</button>
+              <button class="mood-btn" onclick="setMood('overtime')">🔥 Overtime</button>
+              <button class="mood-btn" onclick="setMood('done')">🌙 Shift Done</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="feature-title">Always on Desktop & Tray</div>
+        <div class="feature-desc">Sits on your desktop background without cluttering your Alt+Tab or taskbar. Win+D and swipe-proof.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="feature-title">Office Geofence Verification</div>
+        <div class="feature-desc">Integrated Windows Geolocator verifies proximity to company coordinates for reliable attendance.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </div>
+        <div class="feature-title">Dynamic Mascot Expressions</div>
+        <div class="feature-desc">Clocky changes expressions as your day passes—from energetic morning vibes to drowsy overtime fatigue.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="feature-title">Smart Shift Reminders</div>
+        <div class="feature-desc">Nags after 10 AM every 10 min until you clock in, and from 7 PM every 10 min until you clock out. Stops immediately upon action.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        </div>
+        <div class="feature-title">Hydration & Stretch Alerts</div>
+        <div class="feature-desc">Stay healthy with periodic reminders to drink fresh water, stretch your arms, reset your posture, and rest your eyes.</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="feature-title">Windows Credential Locker</div>
+        <div class="feature-desc">Zero tokens in plaintext storage. Your credentials and session tokens are encrypted directly inside the OS keychain.</div>
+      </div>
+    </div>
+
+    <!-- Setup Guide Card -->
+    <div class="setup-card">
+      <div class="setup-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        First-Time Quick Setup (Windows)
+      </div>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-heading">Download & Run the Setup</div>
+            <div class="step-text">Download <code>Clocky_1.0.0_x64-setup.exe</code> and run the installer. Clocky is an ultra-lightweight app under 10 MB and installs in seconds.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-heading">Sign In Once with HRMS</div>
+            <div class="step-text">Enter your office email and password. Your token is encrypted in Windows Credential Locker—no daily login hassle.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-heading">Ready to Go!</div>
+            <div class="step-text">Clocky stays pinned on your desktop or system tray. Click <strong>Clock In</strong> when you start and <strong>Clock Out</strong> when you head home.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Internal Office Distribution • HRMS Engineering Team • Meet Dobariya
+    </footer>
+  </div>
+
+  <script>
+    // Mascot faces for interactive mood switcher
+    const MASCOTS = {
+      morning: {
+        fill: '#FFD84D',
+        face: `
+          <circle cx="44" cy="50" r="6" fill="#2B2140" />
+          <circle cx="42" cy="48" r="2.2" fill="#FFFFFF" />
+          <circle cx="46.5" cy="51.5" r="1.1" fill="#FFFFFF" />
+          <circle cx="76" cy="50" r="6" fill="#2B2140" />
+          <circle cx="74" cy="48" r="2.2" fill="#FFFFFF" />
+          <circle cx="78.5" cy="51.5" r="1.1" fill="#FFFFFF" />
+          <path d="M50 63 Q60 74 70 63" fill="#2B2140" stroke="#2B2140" stroke-width="2" stroke-linecap="round" />
+          <path d="M53 65 Q60 72 67 65" fill="#FF8A7A" />
+        `,
+        bubble: "Bounce! Ready to conquer the workday! ☀️",
+        cardClass: "",
+        btnText: "Clock Out",
+        btnColor: "#FF8A7A",
+      },
+      midday: {
+        fill: '#FFD84D',
+        face: `
+          <circle cx="44" cy="50" r="5.5" fill="#2B2140" />
+          <circle cx="42.5" cy="48" r="2" fill="#FFFFFF" />
+          <circle cx="76" cy="50" r="5.5" fill="#2B2140" />
+          <circle cx="74.5" cy="48" r="2" fill="#FFFFFF" />
+          <path d="M52 64 Q60 72 68 64" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" />
+        `,
+        bubble: "In the zone! Working steadily. 💻",
+        cardClass: "",
+        btnText: "Clock Out",
+        btnColor: "#FF8A7A",
+      },
+      afternoon: {
+        fill: '#FFD84D',
+        face: `
+          <circle cx="44" cy="51" r="5.5" fill="#2B2140" />
+          <circle cx="43" cy="51" r="1.8" fill="#FFFFFF" />
+          <path d="M37 46 Q44 49 51 46" fill="none" stroke="#2B2140" stroke-width="3" stroke-linecap="round" />
+          <circle cx="76" cy="51" r="5.5" fill="#2B2140" />
+          <circle cx="75" cy="51" r="1.8" fill="#FFFFFF" />
+          <path d="M69 46 Q76 49 83 46" fill="none" stroke="#2B2140" stroke-width="3" stroke-linecap="round" />
+          <path d="M53 65 Q57 63 61 65 Q65 67 67 65" fill="none" stroke="#2B2140" stroke-width="3" stroke-linecap="round" />
+          <path d="M85 32 C85 32 88 36 88 38 C88 40 86.5 41.5 85 41.5 C83.5 41.5 82 40 82 38 C82 36 85 32 85 32 Z" fill="#60A5FA" />
+        `,
+        bubble: "Remember to take a sip of water & stretch! 💧",
+        cardClass: "",
+        btnText: "Clock Out",
+        btnColor: "#FF8A7A",
+      },
+      overtime: {
+        fill: '#FFBA7A',
+        face: `
+          <path d="M37 47 L48 52 L37 57" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M83 47 L72 52 L83 57" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+          <ellipse cx="60" cy="65" rx="5" ry="6" fill="#2B2140" />
+          <path d="M57 67 Q60 70 63 67" fill="#FF8A7A" />
+          <path d="M88 28 C88 28 92 33 92 36 C92 38.5 90 40 88 40 C86 40 84 38.5 84 36 C84 33 88 28 88 28 Z" fill="#60A5FA" />
+        `,
+        bubble: "Past 7 PM! Time to clock out and rest! 🔥",
+        cardClass: "",
+        btnText: "Clock Out",
+        btnColor: "#FF8A7A",
+      },
+      done: {
+        fill: '#B9A7FF',
+        face: `
+          <path d="M38 52 Q44 44 50 52" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" />
+          <path d="M70 52 Q76 44 82 52" fill="none" stroke="#2B2140" stroke-width="3.5" stroke-linecap="round" />
+          <path d="M54 63 Q60 68 66 63" fill="none" stroke="#2B2140" stroke-width="3" stroke-linecap="round" />
+          <g class="floating-zs">
+            <text x="82" y="38" font-family="'Baloo 2'" font-weight="800" font-size="14" fill="#2B2140">z</text>
+            <text x="94" y="24" font-family="'Baloo 2'" font-weight="800" font-size="17" fill="#2B2140">z</text>
+            <text x="104" y="12" font-family="'Baloo 2'" font-weight="800" font-size="20" fill="#2B2140">Z</text>
+          </g>
+        `,
+        bubble: "Shift completed! Have a wonderful evening. 🌙",
+        cardClass: "sleep",
+        btnText: "Day Complete",
+        btnColor: "rgba(43, 33, 64, 0.08)",
+      }
+    };
+
+    function renderSvg(moodKey) {
+      const mood = MASCOTS[moodKey] || MASCOTS.midday;
+      return `
+        <svg class="wp-svg" viewBox="0 0 120 110" role="img">
+          <ellipse cx="60" cy="103" rx="38" ry="4.5" fill="#2B2140" opacity="0.15" />
+          <g class="clocky-blob">
+            <path
+              d="M60 8c28 0 50 20 50 50 0 26-20 42-50 42S10 84 10 58C10 28 32 8 60 8z"
+              fill="${mood.fill}"
+              stroke="#2B2140"
+              stroke-width="4"
+              stroke-linejoin="round"
+            />
+            <circle cx="33" cy="64" r="7" fill="#FF8A7A" opacity="0.55" />
+            <circle cx="87" cy="64" r="7" fill="#FF8A7A" opacity="0.55" />
+            ${mood.face}
+          </g>
+        </svg>
+      `;
+    }
+
+    function setMood(moodKey) {
+      document.querySelectorAll('.mood-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('onclick').includes(moodKey));
+      });
+
+      const mood = MASCOTS[moodKey];
+      const card = document.getElementById('widget-card');
+      const bubble = document.getElementById('widget-bubble');
+      const mascot = document.getElementById('widget-mascot');
+      const btn = document.getElementById('widget-action-btn');
+      const statusLbl = document.getElementById('widget-status-lbl');
+
+      mascot.innerHTML = renderSvg(moodKey);
+      bubble.innerText = mood.bubble;
+      btn.innerText = mood.btnText;
+      btn.style.backgroundColor = mood.btnColor;
+
+      if (mood.cardClass) {
+        card.classList.add(mood.cardClass);
+      } else {
+        card.classList.remove('sleep');
+      }
+
+      if (moodKey === 'done') {
+        statusLbl.innerText = "shift completed today";
+        btn.style.cursor = "default";
+      } else {
+        statusLbl.innerText = "worked today";
+        btn.style.cursor = "pointer";
+      }
+    }
+
+    // Initialize with Midday expression
+    setMood('midday');
+
+    // Live Ticker simulation for the preview
+    let seconds = 4 * 3600 + 14 * 60 + 21;
+    setInterval(() => {
+      seconds++;
+      const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      const timeStr = `${h}:${m}:${s}`;
+      
+      const el1 = document.getElementById('demo-timer');
+      const el2 = document.getElementById('header-timer');
+      const el3 = document.getElementById('widget-timer');
+      if (el1) el1.innerText = timeStr;
+      if (el2) el2.innerText = timeStr;
+      if (el3) el3.innerText = timeStr;
+    }, 1000);
+  </script>
+</body>
+</html>
