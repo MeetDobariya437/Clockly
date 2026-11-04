@@ -37,8 +37,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  width: 290px;
-  height: 390px;
+  width: 100vw;
+  height: 100vh;
   background: transparent !important;
   font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
   color: var(--ink);
@@ -46,17 +46,20 @@ html, body {
 }
 
 .widget-wrapper {
-  width: 290px;
-  height: 390px;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 6px;
+  box-sizing: border-box;
 }
 
 .card {
-  width: 254px;
-  height: 360px;
+  width: 100%;
+  height: 100%;
+  max-width: 270px;
+  max-height: 390px;
   background-color: var(--paper-sleep);
   border: var(--outline);
   border-radius: var(--card-radius);
@@ -68,6 +71,7 @@ html, body {
   padding: 10px 14px 14px 14px;
   transition: background-color 0.4s ease;
   position: relative;
+  box-sizing: border-box;
 }
 
 .card.awake {
@@ -458,24 +462,34 @@ html, body {
 }
 
 /* Login View */
+.card:has(.login-view) .mascot-area {
+  height: 72px;
+  margin-top: -6px;
+}
+
+.card:has(.login-view) .clocky-svg {
+  width: 86px;
+  height: 72px;
+}
+
 .login-view {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .login-form {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .login-input {
   width: 100%;
-  height: 36px;
+  height: 34px;
   background: #FFFFFF;
   border: var(--outline);
   border-radius: 12px;
