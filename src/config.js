@@ -31,24 +31,56 @@ export const CONFIG = {
 
   // How to read attendance state from the STATUS (history) and check-in/out responses
   PARSE_STATUS: (json) => {
-    // 1. Check history response structure with todayRecord
-    let record = json?.todayRecord;
+    // Current local calendar date (YYYY-MM-DD)
+    const now = new Date();
+    const todayLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-    // If todayRecord is not provided or empty, try finding today's record in data array
+    // Helper to format any ISO or UTC date string into local YYYY-MM-DD
+    const toLocalDateStr = (val) => {
+      if (!val) return null;
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return null;
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    let record = null;
+
+    // 1. Check if todayRecord is actually for today's date
+    if (json?.todayRecord) {
+      const rec = json.todayRecord;
+      const recDate = toLocalDateStr(rec.checkIn) || toLocalDateStr(rec.date);
+      if (recDate === todayLocal) {
+        record = rec;
+      }
+    }
+
+    // 2. If todayRecord was from yesterday or not found, search data array for today's date
     if (!record && Array.isArray(json?.data)) {
-      const todayIso = new Date().toISOString().slice(0, 10);
       record = json.data.find((item) => {
-        if (!item?.date && !item?.checkIn) return false;
-        const itemDate = (item.checkIn || item.date || '').slice(0, 10);
-        return itemDate === todayIso;
+        const itemDate = toLocalDateStr(item?.checkIn) || toLocalDateStr(item?.date);
+        return itemDate === todayLocal;
       }) || null;
     }
 
+    // 3. Fallback for single object response (e.g. from check-in/out POST)
     if (!record && json?.data && !Array.isArray(json.data)) {
-      record = json.data;
+      const recDate = toLocalDateStr(json.data.checkIn) || toLocalDateStr(json.data.date);
+      if (recDate === todayLocal) {
+        record = json.data;
+      }
     }
-    if (!record && json && !Array.isArray(json)) {
-      record = json;
+
+    // If no record exists for today (new day / after 12:00 AM midnight):
+    // Shift is NOT done, user has NOT checked in yet -> show Clock In!
+    if (!record) {
+      return {
+        checkedIn: false,
+        shiftDone: false,
+        checkInTime: null,
+        checkOutTime: null,
+        workingHours: null,
+        status: null,
+      };
     }
 
     const checkIn = record?.checkIn || record?.checkInTime || null;

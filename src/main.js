@@ -667,7 +667,26 @@ async function initApp() {
     render();
   }
 
-  setInterval(() => {
+  let activeCalendarDay = formatDate();
+
+  setInterval(async () => {
+    const currentDay = formatDate();
+    // Midnight rollover (12:00 AM): calendar day changed!
+    if (currentDay !== activeCalendarDay) {
+      activeCalendarDay = currentDay;
+      state.shiftDone = false;
+      state.checkedIn = false;
+      state.checkInTime = null;
+      state.checkOutTime = null;
+      state.workingHours = null;
+      if (state.token && !state.isLoadingAction) {
+        await fetchStatusAndRender();
+      } else {
+        render();
+      }
+      return;
+    }
+
     if (state.view === 'main') {
       const timeValEl = cardEl.querySelector('.time-value');
       const timeLblEl = cardEl.querySelector('.time-label');
