@@ -19,10 +19,10 @@ jobs:
         include:
           - platform: 'windows-latest'
             name: 'windows'
-            args: ''
+            args: '--bundles nsis'
           - platform: 'macos-latest'
             name: 'macos'
-            args: ''
+            args: '--bundles dmg'
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -64,7 +64,6 @@ jobs:
         with:
           name: clocky-windows-installers
           path: |
-            src-tauri/target/release/bundle/msi/*.msi
             src-tauri/target/release/bundle/nsis/*.exe
           if-no-files-found: warn
 

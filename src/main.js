@@ -96,6 +96,7 @@ const state = {
   isOvertime: false,
   isLoadingAction: false,
   actionLoadingText: '',
+  confirmAction: null, // null | 'in' | 'out'
   bubbleText: '',
   loginError: null,
   streak: 0,
@@ -417,6 +418,34 @@ function render() {
         Day Complete &bull; Shift Ended
       </div>
     `;
+  } else if (state.confirmAction === 'in' || state.confirmAction === 'out') {
+    const isOut = state.confirmAction === 'out';
+    const promptText = isOut ? 'Clock out & finish shift?' : 'Clock in for today?';
+    const yesText = isOut ? 'Yes, Clock Out' : 'Yes, Clock In';
+    const yesClass = isOut ? 'check-out' : 'check-in';
+    const loadingText = isOut ? 'Clocking Out...' : 'Clocking In...';
+
+    actionAreaHtml = `
+      <div class="confirm-box">
+        <div class="confirm-prompt">${promptText}</div>
+        <div class="confirm-btns">
+          <button
+            id="confirmYesBtn"
+            class="squishy-btn confirm-yes ${yesClass}"
+            ${state.isLoadingAction ? 'disabled' : ''}
+          >
+            ${state.isLoadingAction ? loadingText : yesText}
+          </button>
+          <button
+            id="confirmNoBtn"
+            class="squishy-btn confirm-no"
+            ${state.isLoadingAction ? 'disabled' : ''}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    `;
   } else if (state.checkedIn) {
     // Clocked in: show Clock Out button
     const btnText = state.isLoadingAction
@@ -525,6 +554,34 @@ function wireLoginForm() {
   });
 }
 
+let confirmTimer = null;
+
+function setConfirmAction(action) {
+  if (confirmTimer) {
+    clearTimeout(confirmTimer);
+    confirmTimer = null;
+  }
+  state.confirmAction = action;
+  if (action === 'in') {
+    state.bubbleText = 'Ready to start your shift today?';
+  } else if (action === 'out') {
+    state.bubbleText = 'Ready to wrap up and clock out?';
+  } else {
+    updateContextualMessage();
+  }
+  render();
+
+  if (action) {
+    confirmTimer = setTimeout(() => {
+      if (state.confirmAction) {
+        state.confirmAction = null;
+        updateContextualMessage();
+        render();
+      }
+    }, 12000);
+  }
+}
+
 function wireMainActions() {
   const mascot = document.getElementById('mascotWrapper');
   if (mascot) {
@@ -544,7 +601,27 @@ function wireMainActions() {
   const actionBtn = document.getElementById('actionBtn');
   if (actionBtn) {
     actionBtn.addEventListener('click', () => {
+      if (state.isLoadingAction || state.shiftDone) return;
+      setConfirmAction(state.checkedIn ? 'out' : 'in');
+    });
+  }
+
+  const confirmYesBtn = document.getElementById('confirmYesBtn');
+  if (confirmYesBtn) {
+    confirmYesBtn.addEventListener('click', () => {
+      if (confirmTimer) {
+        clearTimeout(confirmTimer);
+        confirmTimer = null;
+      }
+      state.confirmAction = null;
       handleAttendanceAction();
+    });
+  }
+
+  const confirmNoBtn = document.getElementById('confirmNoBtn');
+  if (confirmNoBtn) {
+    confirmNoBtn.addEventListener('click', () => {
+      setConfirmAction(null);
     });
   }
 }
