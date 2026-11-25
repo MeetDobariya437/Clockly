@@ -1,6 +1,6 @@
 [package]
 name = "clocky"
-version = "1.0.3"
+version = "1.0.4"
 description = "Clocky - Tiny fun desktop attendance widget"
 authors = ["Your Company"]
 edition = "2021"

@@ -72,9 +72,12 @@ async function sendRequest(method, path, body = null, token = null) {
 
   const url = `${CONFIG.BASE_URL.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
   const headers = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
+    Accept: 'application/json, text/plain, */*',
   };
+
+  if (body && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     Object.assign(headers, CONFIG.AUTH_HEADER(token));
@@ -175,8 +178,25 @@ export async function apiGetStatus(token) {
   return CONFIG.PARSE_STATUS(data);
 }
 
+export async function apiGetPunchToken(token) {
+  if (CONFIG.MOCK) {
+    return 'mock-punch-token-12345';
+  }
+
+  const endpoint = CONFIG.ENDPOINTS.PUNCH_TOKEN || { method: 'GET', path: '/attendance/punch-token' };
+  const res = await sendRequest(endpoint.method, endpoint.path, null, token);
+  const punchToken = res?.punchToken || res?.data?.punchToken || (typeof res === 'string' ? res : null);
+  if (!punchToken) {
+    throw new Error('Server did not return a valid punchToken.');
+  }
+  return punchToken;
+}
+
 export async function apiCheckIn(token) {
-  const loc = await getLocation();
+  const [loc, punchToken] = await Promise.all([
+    getLocation(),
+    apiGetPunchToken(token),
+  ]);
 
   if (CONFIG.MOCK) {
     await new Promise((r) => setTimeout(r, 700));
@@ -195,7 +215,12 @@ export async function apiCheckIn(token) {
 
   let body = {};
   if (CONFIG.LOCATION_MODE === 'inline') {
-    body = { ...CONFIG.LOCATION_BODY(loc) };
+    body = {
+      ...CONFIG.LOCATION_BODY(loc),
+      punchToken,
+    };
+  } else {
+    body = { punchToken };
   }
 
   const endpoint = CONFIG.ENDPOINTS.CHECK_IN;
@@ -204,7 +229,10 @@ export async function apiCheckIn(token) {
 }
 
 export async function apiCheckOut(token) {
-  const loc = await getLocation();
+  const [loc, punchToken] = await Promise.all([
+    getLocation(),
+    apiGetPunchToken(token),
+  ]);
 
   if (CONFIG.MOCK) {
     await new Promise((r) => setTimeout(r, 700));
@@ -223,7 +251,12 @@ export async function apiCheckOut(token) {
 
   let body = {};
   if (CONFIG.LOCATION_MODE === 'inline') {
-    body = { ...CONFIG.LOCATION_BODY(loc) };
+    body = {
+      ...CONFIG.LOCATION_BODY(loc),
+      punchToken,
+    };
+  } else {
+    body = { punchToken };
   }
 
   const endpoint = CONFIG.ENDPOINTS.CHECK_OUT;

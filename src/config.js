@@ -5,11 +5,12 @@ export const CONFIG = {
   BASE_URL: "https://hrms-api.ebuilding.in/api",
 
   ENDPOINTS: {
-    LOGIN:     { method: "POST", path: "/auth/login" },
-    STATUS:    { method: "POST", path: "/attendance/history" },
-    CHECK_IN:  { method: "POST", path: "/attendance" },
-    CHECK_OUT: { method: "POST", path: "/attendance" },
-    LOCATION:  { method: "POST", path: "/location", enabled: false },
+    LOGIN:       { method: "POST", path: "/auth/login" },
+    STATUS:      { method: "POST", path: "/attendance/history" },
+    PUNCH_TOKEN: { method: "GET",  path: "/attendance/punch-token" },
+    CHECK_IN:    { method: "POST", path: "/attendance" },
+    CHECK_OUT:   { method: "POST", path: "/attendance" },
+    LOCATION:    { method: "POST", path: "/location", enabled: false },
   },
 
   // How the login request body is built and how the token is read from the response
